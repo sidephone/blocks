@@ -11,10 +11,10 @@ Level	sec/line
 
 ## Tetris Score System
 
-1 line: 40 * (1 + level)
-2 lines: 100 * (1 + level)
-3 lines: 300 * (1 + level)
-4 lines: 1200 * (1 + level)
+1 line: 2 * (1 + level)
+2 lines: 5 * (1 + level)
+3 lines: 15 * (1 + level)
+4 lines: 60 * (1 + level)
 
 10 lines = next level
 

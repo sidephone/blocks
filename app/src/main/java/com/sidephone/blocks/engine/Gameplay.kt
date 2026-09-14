@@ -5,8 +5,7 @@ import android.view.KeyEvent
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
-import com.sidephone.blocks.engine.entities.Ship
-import com.sidephone.blocks.engine.entities.Space
+import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.graphics.DrawCommandGroup
 import com.sidephone.blocks.engine.graphics.GameFrame
 import com.sidephone.blocks.settings.Settings
@@ -43,7 +42,7 @@ class Gameplay {
 	@Volatile private var firstIteration = true
 
 	// game objects
-	private val ship = Ship()
+	private var playground = Playground()
 
 
 	init {
@@ -58,7 +57,7 @@ class Gameplay {
 	fun reset() {
 		pressedKeys = setOf()
 
-		ship.spawn(viewportWidth, viewportHeight)
+		playground.create(viewportWidth)
 
 		if (!isGameThreadAlive()) {
 			if (!executor.isShutdown && !executor.isTerminated) {
@@ -223,8 +222,10 @@ class Gameplay {
 	@WorkerThread
 	private fun advance() {
 		try {
-			val inputCausedAction = processGameInput(System.currentTimeMillis())
-			render(inputCausedAction)
+			val now = System.currentTimeMillis()
+			processGameInput(now)
+			runLogic(now)
+			render()
 		} catch (e: Exception) {
 			Log.e(LOG_TAG, "Failed advancing ahead gameplay. ${e.message}", e)
 		}
@@ -249,49 +250,30 @@ class Gameplay {
 	 * objects on the screen.
 	 */
 	@WorkerThread
-	private fun processGameInput(now: Long): Boolean {
+	private fun processGameInput(now: Long) {
 		val keys = pressedKeys.toSet() // make a copy for thread safety
-
-		var actionTaken = false
 
 		val leftPressed = KeyEvent.KEYCODE_DPAD_LEFT in keys
 		val rightPressed = KeyEvent.KEYCODE_DPAD_RIGHT in keys
-		if (leftPressed xor rightPressed) {
-			ship.turn(now, left = leftPressed)
-			actionTaken = true
-		}
+		val fasterPressed = KeyEvent.KEYCODE_DPAD_DOWN in keys
+		val dropPressed = KeyEvent.KEYCODE_DPAD_UP in keys
 
-		if (KeyEvent.KEYCODE_DPAD_UP in keys) {
-			ship.moveForward(now, viewportWidth, viewportHeight)
-			actionTaken = true
-		}
-
-		return actionTaken
+		val turnCounterClockwise = KeyEvent.KEYCODE_BUTTON_A in keys
+		val turnClockwise = KeyEvent.KEYCODE_BUTTON_B in keys
 	}
 
 
-	/**
-	 * This is the main method that draws to the screen. In this demo, we draw a spaceship that can
-	 * move around the screen. The spaceship's position and direction are updated based on the pressed
-	 * keys.
-	 */
 	@WorkerThread
-	private fun render(inputCausedAction: Boolean) {
-		var isSceneChanged = inputCausedAction
-
-		if (firstIteration) {
-			firstIteration = false
-			isSceneChanged = true
-		}
-
-		if (!isSceneChanged) {
-			return
-		}
-
+	private fun render() {
 		val screenObjects = mutableListOf<DrawCommandGroup>()
-		screenObjects.add(ship.draw())
-		// add more game objects here, e.g., asteroids, bullets, etc.
+		screenObjects.add(playground.draw())
 
-		currentFrame = GameFrame(Space.BACKGROUND, screenObjects)
+		currentFrame = GameFrame(Playground.Color.BACKGROUND, screenObjects)
+	}
+
+
+	@WorkerThread
+	private fun runLogic(now: Long) {
+
 	}
 }
