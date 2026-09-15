@@ -44,6 +44,11 @@ class Gameplay {
 	// game objects
 	private var playground = Playground()
 
+	// game state
+	private var level = 0
+	private var lines = 0
+	private var score = 0
+
 
 	init {
 	    reset()
@@ -57,6 +62,9 @@ class Gameplay {
 	fun reset() {
 		pressedKeys = setOf()
 
+		lines = 0
+		level = 0
+		score = 0
 		playground.create(viewportWidth)
 
 		if (!isGameThreadAlive()) {
@@ -268,7 +276,7 @@ class Gameplay {
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
 
-		currentFrame = GameFrame(Playground.Color.BACKGROUND, screenObjects)
+		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
 	}
 
 

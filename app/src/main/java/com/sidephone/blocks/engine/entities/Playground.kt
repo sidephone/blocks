@@ -5,27 +5,22 @@ import com.sidephone.blocks.engine.graphics.DrawCommandGroup
 
 
 class Playground {
-	object Color {
+	companion object {
 		const val BACKGROUND = 0xFF000000.toInt()
-		const val GRID_BAR = 0xFF444444.toInt()
-		const val GRID_BORDER = 0xFFFFFFFF.toInt()
-
-		const val WALL = 0xFF9A4F3A.toInt()        // main terracotta brick
-		const val WALL_LIGHT = 0xFFC06A4F.toInt()  // sunlit brick
-		const val WALL_DARK = 0xFF67352C.toInt()   // dark mortar/base
-		const val WALL_MORTAR = 0xFF3A2521.toInt() // deep brown mortar
 	}
 
 	object Screen {
-		const val PADDING_TOP = 120f // virtual px
+		const val PADDING_TOP = 0f // virtual px
 		const val VERTICAL_SEPARATOR_WIDTH = 20f // virtual px
 		const val WIDTH = 480f // virtual px, used to normalize the real viewport width to this
 	}
 
 	object Playground {
+		const val COLOR_GRID = 0xFF404040.toInt()
+
 		// Total width = 10 for columns + 4 for preview + 2 for preview padding = 16 blocks wide. There
 		// are two vertical separators on both sides, and one between the playground and the preview.
-		const val CELL_WIDTH = (Screen.WIDTH - 3 * Screen.VERTICAL_SEPARATOR_WIDTH) / 16 // virtual px
+		const val CELL_WIDTH = (Screen.WIDTH - 2 * Screen.VERTICAL_SEPARATOR_WIDTH) / 16 // virtual px
 		const val CELL_HEIGHT = CELL_WIDTH * 0.95f // virtual px
 		const val COLUMNS = 10
 		const val ROWS = 24
@@ -40,6 +35,11 @@ class Playground {
 	}
 
 	object Wall {
+		const val COLOR_BRICK = 0xFF9A4F3A.toInt()        // main terracotta brick
+		const val COLOR_BRICK_DARK = 0xFF67352C.toInt()   // dark mortar/base
+		const val COLOR_BRICK_LIGHT = 0xFFC06A4F.toInt()  // sunlit brick
+		const val COLOR_MORTAR = 0xFF3A2521.toInt() // deep brown mortar
+
 		const val BRICK_HEIGHT = 12f // virtual px
 		const val BRICK_GAP = 2f // virtual px
 		const val EDGE_GAP = 2f // virtual px
@@ -47,15 +47,15 @@ class Playground {
 
 	private var drawCommands: List<DrawCommand> = emptyList()
 
-	private var top = 0f
-	private var left = 0f
-	private var gridWidth = 0f
-	private var gridHeight = 0f
+	private var playgroundTop = 0f
+	private var playgroundLeft = 0f
+	private var playgroundWidth = 0f
+	private var playgroundHeight = 0f
 
 	private var previewLeft = 0f
 	private var previewWidth = 0f
 	private var previewHeight = 0f
-
+	private var wallWidth = 0f
 
 	fun draw() = DrawCommandGroup(0f, 0f, 0f, drawCommands)
 
@@ -63,92 +63,84 @@ class Playground {
 	fun create(viewportWidth: Float) {
 		val scale = viewportWidth / Screen.WIDTH
 
-		top = (Screen.PADDING_TOP * scale)
-		left = (Screen.VERTICAL_SEPARATOR_WIDTH * scale)
-		gridWidth = Playground.COLUMNS * Playground.CELL_WIDTH * scale
-		gridHeight = Playground.ROWS_VISIBLE * Playground.CELL_HEIGHT * scale
+		playgroundTop = (Screen.PADDING_TOP * scale)
+		playgroundLeft = (Screen.VERTICAL_SEPARATOR_WIDTH * scale)
+		playgroundWidth = Playground.COLUMNS * Playground.CELL_WIDTH * scale
+		playgroundHeight = Playground.ROWS_VISIBLE * Playground.CELL_HEIGHT * scale
 
-		previewLeft = left + gridWidth + Screen.VERTICAL_SEPARATOR_WIDTH * scale
+		previewLeft = playgroundLeft + playgroundWidth + Screen.VERTICAL_SEPARATOR_WIDTH * scale
 		previewWidth = Preview.COLUMNS * Preview.CELL_WIDTH * scale
 		previewHeight = Preview.ROWS * Preview.CELL_HEIGHT * scale
 
-		drawCommands =  drawDebugGrid(scale) + drawSeparatorWalls(scale) + drawPlayground() + drawPreviewBox()
+		wallWidth = Screen.VERTICAL_SEPARATOR_WIDTH * scale
+
+		drawCommands =  drawGrid(scale) + drawPlayground(scale) + drawPreviewBox(scale)
 	}
 
 
-
-	private fun drawPlayground(): List<DrawCommand> {
-		return listOf(
-			DrawCommand.Rect(left, top, left + gridWidth, top + gridHeight, 0f, Color.GRID_BORDER, false)
-		)
-	}
-
-
-	private fun drawDebugGrid(scale: Float): List<DrawCommand> {
+		private fun drawGrid(scale: Float): List<DrawCommand> {
 		val commands = mutableListOf<DrawCommand>()
 
 		for (row in 0..Playground.ROWS_VISIBLE) {
-			val y = top + row * Playground.CELL_HEIGHT * scale
-			commands.add(DrawCommand.Line(left, y, left + gridWidth, y, Color.GRID_BAR))
+			val y = playgroundTop + row * Playground.CELL_HEIGHT * scale
+			commands.add(DrawCommand.Line(playgroundLeft, y, playgroundLeft + playgroundWidth, y, Playground.COLOR_GRID))
 		}
 
 		for (col in 0..Playground.COLUMNS) {
-			val x = left + col * Playground.CELL_WIDTH * scale
-			commands.add(DrawCommand.Line(x, top, x, top + gridHeight, Color.GRID_BAR))
+			val x = playgroundLeft + col * Playground.CELL_WIDTH * scale
+			commands.add(DrawCommand.Line(x, playgroundTop, x, playgroundTop + playgroundHeight, Playground.COLOR_GRID))
 		}
 
 		return commands
 	}
 
 
-	private fun drawPreviewBox(): List<DrawCommand> {
-		return listOf(
-			DrawCommand.Rect(previewLeft, top, previewLeft + previewWidth, top + previewHeight, 0f, Color.GRID_BORDER, false)
-		)
+	private fun drawPlayground(scale: Float): List<DrawCommand> {
+		return drawBrickWall( // left wall
+				left = 0f,
+				top = playgroundTop,
+				right = playgroundLeft,
+				bottom = playgroundHeight + wallWidth,
+				scale = scale
+			) +
+
+			drawBrickWall( // central wall
+				left = playgroundLeft + playgroundWidth,
+				top = playgroundTop,
+				right = playgroundLeft + playgroundWidth + wallWidth,
+				bottom = playgroundHeight + wallWidth,
+				scale = scale
+			) +
+
+			drawBrickWall( // bottom wall
+				left = 0f,
+				top = playgroundTop + playgroundHeight,
+				right = Screen.WIDTH * scale,
+				bottom = playgroundTop + playgroundHeight + wallWidth,
+				scale = scale,
+				horizontal = true
+			)
 	}
 
 
-	private fun drawSeparatorWalls(scale: Float): List<DrawCommand> {
-		val commands = mutableListOf<DrawCommand>()
-
-		val separatorWidth = Screen.VERTICAL_SEPARATOR_WIDTH * scale
-
-		// Left wall
-		val leftWallX = left - separatorWidth
-
-		commands += drawBrickWall(
-			left = leftWallX,
-			top = top,
-			right = left,
-			bottom = top + gridHeight,
-			scale = scale
-		)
-
-		// Central wall
-		val centralWallX = left + gridWidth
-
-		commands += drawBrickWall(
-			left = centralWallX,
-			top = top,
-			right = centralWallX + separatorWidth,
-			bottom = top + gridHeight,
-			scale = scale
-		)
-
-		// Top wall
-		val topWallY = top - separatorWidth
-
-		commands += drawBrickWall(
-			left = leftWallX,
-			top = topWallY,
+	private fun drawPreviewBox(scale: Float): List<DrawCommand> {
+		return drawBrickWall( // top wall
+			left = previewLeft,
+			top = playgroundTop,
 			right = Screen.WIDTH * scale,
-			bottom = top,
+			bottom = playgroundTop + wallWidth,
+			scale = scale,
+			horizontal = true
+		) + drawBrickWall( // bottom wall
+			left = previewLeft,
+			top = playgroundTop + wallWidth + previewHeight,
+			right = Screen.WIDTH * scale,
+			bottom = playgroundTop + wallWidth + previewHeight + wallWidth,
 			scale = scale,
 			horizontal = true
 		)
-
-		return commands
 	}
+
 
 
 	private fun drawBrickWall(
@@ -161,43 +153,17 @@ class Playground {
 	): List<DrawCommand> {
 		val commands = mutableListOf<DrawCommand>()
 
-		// Dark base behind the bricks.
-		commands += DrawCommand.Rect(
-			left = left,
-			top = top,
-			right = right,
-			bottom = bottom,
-			rotateDeg = 0f,
-			color = Color.WALL_DARK,
-			filled = true
-		)
+		// dark base behind the bricks
+		commands += DrawCommand.Rect(left, top, right, bottom, 0f, Wall.COLOR_BRICK_DARK, true)
 
 		val brickHeight = Wall.BRICK_HEIGHT * scale
 		val gap = Wall.BRICK_GAP * scale
 		val edgeGap = Wall.EDGE_GAP * scale
 
-		if (horizontal) {
-			drawHorizontalBricks(
-				commands,
-				left,
-				top,
-				right,
-				bottom,
-				brickHeight,
-				gap,
-				edgeGap
-			)
+		commands += if (horizontal) {
+			drawHorizontalBricks(left, top, right, bottom, brickHeight, gap, edgeGap)
 		} else {
-			drawVerticalBricks(
-				commands,
-				left,
-				top,
-				right,
-				bottom,
-				brickHeight,
-				gap,
-				edgeGap
-			)
+			drawVerticalBricks(left, top, right, bottom, brickHeight, gap, edgeGap)
 		}
 
 		return commands
@@ -205,7 +171,6 @@ class Playground {
 
 
 	private fun drawHorizontalBricks(
-		commands: MutableList<DrawCommand>,
 		left: Float,
 		top: Float,
 		right: Float,
@@ -213,14 +178,16 @@ class Playground {
 		brickHeight: Float,
 		gap: Float,
 		edgeGap: Float
-	) {
+	): List<DrawCommand> {
+		val commands = mutableListOf<DrawCommand>()
+
 		var column = 0
 		var x = left + edgeGap
 
 		while (x < right - edgeGap) {
 			val brickRight = minOf(x + brickHeight - gap, right - edgeGap)
 
-			// Alternate columns to create the same staggered masonry effect.
+			// alternate columns to create staggered masonry effect
 			val inset = if (column % 2 == 0) 0f else gap * 0.75f
 
 			commands += DrawCommand.Rect(
@@ -230,10 +197,10 @@ class Playground {
 				bottom = bottom - edgeGap,
 				rotateDeg = 0f,
 				color = when (column % 4) {
-					0 -> Color.WALL_LIGHT
-					1 -> Color.WALL
-					2 -> Color.WALL
-					else -> Color.WALL_DARK
+					0 -> Wall.COLOR_BRICK_LIGHT
+					1 -> Wall.COLOR_BRICK
+					2 -> Wall.COLOR_BRICK
+					else -> Wall.COLOR_BRICK_DARK
 				},
 				filled = true
 			)
@@ -245,17 +212,18 @@ class Playground {
 					y1 = top + edgeGap,
 					x2 = brickRight + gap * 0.5f,
 					y2 = bottom - edgeGap,
-					color = Color.WALL_MORTAR
+					color = Wall.COLOR_MORTAR
 				)
 			}
 
 			column++
 			x += brickHeight
 		}
+
+		return commands
 	}
 
 	private fun drawVerticalBricks(
-		commands: MutableList<DrawCommand>,
 		left: Float,
 		top: Float,
 		right: Float,
@@ -263,14 +231,15 @@ class Playground {
 		brickHeight: Float,
 		gap: Float,
 		edgeGap: Float
-	) {
+	): List<DrawCommand> {
+		val commands = mutableListOf<DrawCommand>()
 		var row = 0
 		var y = top + edgeGap
 
 		while (y < bottom - edgeGap) {
 			val brickBottom = minOf(y + brickHeight - gap, bottom - edgeGap)
 
-			// Alternate rows slightly to create a masonry pattern.
+			// alternate rows slightly to create a masonry pattern
 			val inset = if (row % 2 == 0) 0f else gap * 0.75f
 
 			commands += DrawCommand.Rect(
@@ -280,27 +249,29 @@ class Playground {
 				bottom = brickBottom,
 				rotateDeg = 0f,
 				color = when (row % 4) {
-					0 -> Color.WALL_LIGHT
-					1 -> Color.WALL
-					2 -> Color.WALL
-					else -> Color.WALL_DARK
+					0 -> Wall.COLOR_BRICK_LIGHT
+					1 -> Wall.COLOR_BRICK
+					2 -> Wall.COLOR_BRICK
+					else -> Wall.COLOR_BRICK_DARK
 				},
 				filled = true
 			)
 
-			// Mortar line across the wall.
+			// mortar line across the wall
 			if (brickBottom < bottom - edgeGap) {
 				commands += DrawCommand.Line(
 					x1 = left + edgeGap,
 					y1 = brickBottom + gap * 0.5f,
 					x2 = right - edgeGap,
 					y2 = brickBottom + gap * 0.5f,
-					color = Color.WALL_MORTAR
+					color = Wall.COLOR_MORTAR
 				)
 			}
 
 			row++
 			y += brickHeight
 		}
+
+		return commands
 	}
 }
