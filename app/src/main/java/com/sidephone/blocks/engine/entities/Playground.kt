@@ -57,14 +57,20 @@ class Playground {
 	private var previewHeight = 0f
 	private var wallWidth = 0f
 
+	private var scoreboardTop = 0f
+	private var scoreboardLeft = 0f
+
+
 	fun draw() = DrawCommandGroup(0f, 0f, 0f, drawCommands)
+	fun scoreboardPosition() = Pair(scoreboardLeft, scoreboardTop)
+	fun scoreboardWidth() = previewWidth
 
 
 	fun create(viewportWidth: Float) {
 		val scale = viewportWidth / Screen.WIDTH
 
-		playgroundTop = (Screen.PADDING_TOP * scale)
-		playgroundLeft = (Screen.VERTICAL_SEPARATOR_WIDTH * scale)
+		playgroundTop = Screen.PADDING_TOP * scale
+		playgroundLeft = Screen.VERTICAL_SEPARATOR_WIDTH * scale
 		playgroundWidth = Playground.COLUMNS * Playground.CELL_WIDTH * scale
 		playgroundHeight = Playground.ROWS_VISIBLE * Playground.CELL_HEIGHT * scale
 
@@ -74,11 +80,14 @@ class Playground {
 
 		wallWidth = Screen.VERTICAL_SEPARATOR_WIDTH * scale
 
+		scoreboardTop = playgroundTop + wallWidth + previewHeight + wallWidth
+		scoreboardLeft = previewLeft
+
 		drawCommands =  drawGrid(scale) + drawPlayground(scale) + drawPreviewBox(scale)
 	}
 
 
-		private fun drawGrid(scale: Float): List<DrawCommand> {
+	private fun drawGrid(scale: Float): List<DrawCommand> {
 		val commands = mutableListOf<DrawCommand>()
 
 		for (row in 0..Playground.ROWS_VISIBLE) {

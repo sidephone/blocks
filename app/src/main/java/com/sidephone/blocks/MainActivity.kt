@@ -27,13 +27,16 @@ import com.sidephone.blocks.ui.theme.GameTheme
 
 class MainActivity : ComponentActivity() {
 	private var gamepad = Gamepad()
-	private var gameplay = Gameplay()
+	private lateinit var gameplay: Gameplay
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
 		enableEdgeToEdge()
 		switchToFullScreen()
+
+		gameplay = Gameplay(this)
+
 
 		setContent {
 			GameTheme {
@@ -50,7 +53,7 @@ class MainActivity : ComponentActivity() {
 				}
 
 				Box(modifier = Modifier.fillMaxSize()) {
-					GameScreen(gameplay) // Keep this in memory due to an Android bug. See below.
+					GameScreen(gameplay, -666, currentScreen) // Keep this in memory due to an Android bug. See below.
 
 					when (currentScreen) {
 						ScreenType.Menu -> MainMenuScreen(

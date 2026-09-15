@@ -1,5 +1,6 @@
 package com.sidephone.blocks.engine
 
+import android.content.Context
 import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.AnyThread
@@ -9,6 +10,8 @@ import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.graphics.DrawCommandGroup
 import com.sidephone.blocks.engine.graphics.GameFrame
 import com.sidephone.blocks.settings.Settings
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
@@ -18,7 +21,7 @@ import java.util.concurrent.TimeUnit
  * The main game engine class. It contains the game loop, input handling, and game state management.
  * It is designed to be simple and easy to understand, so you can modify it to create your own game.
  */
-class Gameplay {
+class Gameplay(private var context: Context) {
 	companion object {
 		private val LOG_TAG = Gameplay::class.java.simpleName
 	}
@@ -35,6 +38,16 @@ class Gameplay {
 	private var onStartButtonPressed = {}
 	private var onStarted = {}
 
+	private val _lines = MutableStateFlow(0)
+	val lines: StateFlow<Int> = _lines
+
+	private val _level = MutableStateFlow(0)
+	val level: StateFlow<Int> = _level
+
+	private val _score = MutableStateFlow(0)
+	val score: StateFlow<Int> = _score
+
+
 	// graphics
 	@Volatile private var viewportWidth = 1f
 	@Volatile private var viewportHeight = 1f
@@ -44,15 +57,14 @@ class Gameplay {
 	// game objects
 	private var playground = Playground()
 
-	// game state
-	private var level = 0
-	private var lines = 0
-	private var score = 0
-
 
 	init {
 	    reset()
 	}
+
+
+	@MainThread fun scoreboardPosition() = playground.scoreboardPosition()
+	@MainThread fun scoreboardWidth() = playground.scoreboardWidth()
 
 
 	/**
@@ -62,10 +74,12 @@ class Gameplay {
 	fun reset() {
 		pressedKeys = setOf()
 
-		lines = 0
-		level = 0
-		score = 0
+		_lines.value = 0
+		_level.value = 0
+		_score.value = 0
+
 		playground.create(viewportWidth)
+
 
 		if (!isGameThreadAlive()) {
 			if (!executor.isShutdown && !executor.isTerminated) {
