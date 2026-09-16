@@ -13,8 +13,8 @@ class Settings(context: android.content.Context) {
 		const val TARGET_IPS = 15
 	}
 
-
 	private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
+
 
 	fun getHighScore(): Int {
 		return sharedPreferences.getInt(HIGH_SCORE_KEY, 0)

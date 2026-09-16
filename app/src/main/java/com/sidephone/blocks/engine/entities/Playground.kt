@@ -35,10 +35,10 @@ class Playground {
 	}
 
 	object Wall {
-		const val COLOR_BRICK = 0xFF9A4F3A.toInt()        // main terracotta brick
-		const val COLOR_BRICK_DARK = 0xFF67352C.toInt()   // dark mortar/base
-		const val COLOR_BRICK_LIGHT = 0xFFC06A4F.toInt()  // sunlit brick
-		const val COLOR_MORTAR = 0xFF3A2521.toInt() // deep brown mortar
+		const val COLOR_BRICK = 0xFF9A4F3A.toInt()
+		const val COLOR_BRICK_DARK = 0xFF67352C.toInt()
+		const val COLOR_BRICK_LIGHT = 0xFFC06A4F.toInt()
+		const val COLOR_MORTAR = 0xFF3A2521.toInt()
 
 		const val BRICK_HEIGHT = 12f // virtual px
 		const val BRICK_GAP = 2f // virtual px
@@ -149,7 +149,6 @@ class Playground {
 			horizontal = true
 		)
 	}
-
 
 
 	private fun drawBrickWall(

@@ -29,7 +29,7 @@ fun HudOverlay(textColor: Color, highScore: Int, gameplay: Gameplay) {
 			modifier = Modifier
 				.width(with(LocalDensity.current) { gameplay.scoreboardWidth().toDp() } )
 				.offset { IntOffset(x = x.toInt(), y = y.toInt()) }
-				.padding(Dimens.HudPadding)
+				.padding(Dimens.ScoreboardPadding)
 		) {
 			ScoreboardRow(titleResId = R.string.scoreboard_level, value = level, textColor = textColor)
 			ScoreboardRow(titleResId = R.string.scoreboard_lines, value = lines, textColor = textColor)

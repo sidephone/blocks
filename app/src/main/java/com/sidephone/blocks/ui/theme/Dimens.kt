@@ -11,5 +11,5 @@ object Dimens {
 	val MainMenuButtonPaddingBottom = 3.dp
 	val MainMenuButtonPaddingHorizontal = 24.dp
 
-	val HudPadding = 5.dp
+	val ScoreboardPadding = 5.dp
 }
