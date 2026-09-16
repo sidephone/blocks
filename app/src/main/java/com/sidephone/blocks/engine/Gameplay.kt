@@ -137,13 +137,13 @@ class Gameplay(private var context: Context) {
 		engineLooper = executor.scheduleWithFixedDelay(
 			{ advance() },
 			0,
-			1_000_000_000L / Settings.TARGET_IPS,
+			1_000_000_000L / Settings.Gameplay.TARGET_IPS,
 			TimeUnit.NANOSECONDS
 		)
 
 		onStarted()
 
-		Log.d(LOG_TAG, "Gameplay loop started at ${Settings.TARGET_IPS} iterations per second")
+		Log.d(LOG_TAG, "Gameplay loop started at ${Settings.Gameplay.TARGET_IPS} iterations per second")
 	}
 
 
