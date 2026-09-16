@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -22,12 +23,14 @@ import com.sidephone.blocks.screens.MainMenuScreen
 import com.sidephone.blocks.screens.ScreenType
 import com.sidephone.blocks.screens.SettingsScreen
 import com.sidephone.blocks.screens.game.GameScreen
+import com.sidephone.blocks.settings.Settings
 import com.sidephone.blocks.ui.theme.GameTheme
 
 
 class MainActivity : ComponentActivity() {
 	private var gamepad = Gamepad()
-	private var gameplay = Gameplay()
+	private lateinit var gameplay: Gameplay
+	private lateinit var settings: Settings
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -35,9 +38,13 @@ class MainActivity : ComponentActivity() {
 		enableEdgeToEdge()
 		switchToFullScreen()
 
+		gameplay = Gameplay(this)
+		settings = Settings(this)
+
 		setContent {
 			GameTheme {
 				var currentScreen by remember { mutableStateOf(ScreenType.Menu) }
+				var highScore by remember { mutableIntStateOf(0) }
 				var isGamePaused by remember { mutableStateOf(false) }
 
 				// Back button/gesture returns to the menu from any sub-screen
@@ -50,7 +57,7 @@ class MainActivity : ComponentActivity() {
 				}
 
 				Box(modifier = Modifier.fillMaxSize()) {
-					GameScreen(gameplay) // Keep this in memory due to an Android bug. See below.
+					GameScreen(gameplay, highScore, currentScreen) // Keep this in memory due to an Android bug. See below.
 
 					when (currentScreen) {
 						ScreenType.Menu -> MainMenuScreen(
@@ -65,12 +72,16 @@ class MainActivity : ComponentActivity() {
 								currentScreen = ScreenType.Game
 
 								gamepad.reset()
+								highScore = settings.getHighScore()
 
 								if (!gameplay.isPaused()) gameplay.reset()
 								gameplay
 									.setOnStartButtonPressedCallback {
 										currentScreen = ScreenType.Menu
 										isGamePaused = gameplay.isPaused()
+										if (settings.updateHighScoreIfNeeded(gameplay.score.value)) {
+											highScore = gameplay.score.value
+										}
 									}
 									.start()
 							},

@@ -1,15 +1,17 @@
 package com.sidephone.blocks.engine
 
+import android.content.Context
 import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
-import com.sidephone.blocks.engine.entities.Ship
-import com.sidephone.blocks.engine.entities.Space
+import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.graphics.DrawCommandGroup
 import com.sidephone.blocks.engine.graphics.GameFrame
 import com.sidephone.blocks.settings.Settings
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
@@ -19,7 +21,7 @@ import java.util.concurrent.TimeUnit
  * The main game engine class. It contains the game loop, input handling, and game state management.
  * It is designed to be simple and easy to understand, so you can modify it to create your own game.
  */
-class Gameplay {
+class Gameplay(private var context: Context) {
 	companion object {
 		private val LOG_TAG = Gameplay::class.java.simpleName
 	}
@@ -36,6 +38,16 @@ class Gameplay {
 	private var onStartButtonPressed = {}
 	private var onStarted = {}
 
+	private val _lines = MutableStateFlow(0)
+	val lines: StateFlow<Int> = _lines
+
+	private val _level = MutableStateFlow(0)
+	val level: StateFlow<Int> = _level
+
+	private val _score = MutableStateFlow(0)
+	val score: StateFlow<Int> = _score
+
+
 	// graphics
 	@Volatile private var viewportWidth = 1f
 	@Volatile private var viewportHeight = 1f
@@ -43,12 +55,16 @@ class Gameplay {
 	@Volatile private var firstIteration = true
 
 	// game objects
-	private val ship = Ship()
+	private var playground = Playground()
 
 
 	init {
 	    reset()
 	}
+
+
+	@MainThread fun scoreboardPosition() = playground.scoreboardPosition()
+	@MainThread fun scoreboardWidth() = playground.scoreboardWidth()
 
 
 	/**
@@ -58,7 +74,12 @@ class Gameplay {
 	fun reset() {
 		pressedKeys = setOf()
 
-		ship.spawn(viewportWidth, viewportHeight)
+		_lines.value = 0
+		_level.value = 0
+		_score.value = 0
+
+		playground.create(viewportWidth)
+
 
 		if (!isGameThreadAlive()) {
 			if (!executor.isShutdown && !executor.isTerminated) {
@@ -116,13 +137,13 @@ class Gameplay {
 		engineLooper = executor.scheduleWithFixedDelay(
 			{ advance() },
 			0,
-			1_000_000_000L / Settings.TARGET_IPS,
+			1_000_000_000L / Settings.Gameplay.TARGET_IPS,
 			TimeUnit.NANOSECONDS
 		)
 
 		onStarted()
 
-		Log.d(LOG_TAG, "Gameplay loop started at ${Settings.TARGET_IPS} iterations per second")
+		Log.d(LOG_TAG, "Gameplay loop started at ${Settings.Gameplay.TARGET_IPS} iterations per second")
 	}
 
 
@@ -223,8 +244,10 @@ class Gameplay {
 	@WorkerThread
 	private fun advance() {
 		try {
-			val inputCausedAction = processGameInput(System.currentTimeMillis())
-			render(inputCausedAction)
+			val now = System.currentTimeMillis()
+			processGameInput(now)
+			runLogic(now)
+			render()
 		} catch (e: Exception) {
 			Log.e(LOG_TAG, "Failed advancing ahead gameplay. ${e.message}", e)
 		}
@@ -249,49 +272,30 @@ class Gameplay {
 	 * objects on the screen.
 	 */
 	@WorkerThread
-	private fun processGameInput(now: Long): Boolean {
+	private fun processGameInput(now: Long) {
 		val keys = pressedKeys.toSet() // make a copy for thread safety
-
-		var actionTaken = false
 
 		val leftPressed = KeyEvent.KEYCODE_DPAD_LEFT in keys
 		val rightPressed = KeyEvent.KEYCODE_DPAD_RIGHT in keys
-		if (leftPressed xor rightPressed) {
-			ship.turn(now, left = leftPressed)
-			actionTaken = true
-		}
+		val fasterPressed = KeyEvent.KEYCODE_DPAD_DOWN in keys
+		val dropPressed = KeyEvent.KEYCODE_DPAD_UP in keys
 
-		if (KeyEvent.KEYCODE_DPAD_UP in keys) {
-			ship.moveForward(now, viewportWidth, viewportHeight)
-			actionTaken = true
-		}
-
-		return actionTaken
+		val turnCounterClockwise = KeyEvent.KEYCODE_BUTTON_A in keys
+		val turnClockwise = KeyEvent.KEYCODE_BUTTON_B in keys
 	}
 
 
-	/**
-	 * This is the main method that draws to the screen. In this demo, we draw a spaceship that can
-	 * move around the screen. The spaceship's position and direction are updated based on the pressed
-	 * keys.
-	 */
 	@WorkerThread
-	private fun render(inputCausedAction: Boolean) {
-		var isSceneChanged = inputCausedAction
-
-		if (firstIteration) {
-			firstIteration = false
-			isSceneChanged = true
-		}
-
-		if (!isSceneChanged) {
-			return
-		}
-
+	private fun render() {
 		val screenObjects = mutableListOf<DrawCommandGroup>()
-		screenObjects.add(ship.draw())
-		// add more game objects here, e.g., asteroids, bullets, etc.
+		screenObjects.add(playground.draw())
 
-		currentFrame = GameFrame(Space.BACKGROUND, screenObjects)
+		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
+	}
+
+
+	@WorkerThread
+	private fun runLogic(now: Long) {
+
 	}
 }
