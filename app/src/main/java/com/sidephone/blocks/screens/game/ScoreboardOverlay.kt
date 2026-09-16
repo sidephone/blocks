@@ -31,9 +31,10 @@ fun HudOverlay(textColor: Color, highScore: Int, gameplay: Gameplay) {
 				.offset { IntOffset(x = x.toInt(), y = y.toInt()) }
 				.padding(Dimens.HudPadding)
 		) {
-			ScoreboardRow(titleResId = R.string.scoreboard_score, value = score, textColor = textColor)
 			ScoreboardRow(titleResId = R.string.scoreboard_level, value = level, textColor = textColor)
 			ScoreboardRow(titleResId = R.string.scoreboard_lines, value = lines, textColor = textColor)
+			ScoreboardRow(titleResId = R.string.scoreboard_score, value = score, textColor = textColor)
+			ScoreboardRow(titleResId = R.string.scoreboard_high_score, value = highScore, textColor = textColor)
 		}
 	}
 }
