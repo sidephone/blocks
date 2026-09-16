@@ -9,8 +9,9 @@ class Settings(context: android.content.Context) {
 	}
 
 	object Gameplay {
-		const val TARGET_FPS = 15
-		const val TARGET_IPS = 65 // faster engine loop to handle fastest piece drop speed properly
+		// faster loop to handle fastest piece drop speed properly
+		const val TARGET_FPS = 120
+		const val TARGET_IPS = 120
 	}
 
 	private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)

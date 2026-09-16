@@ -90,7 +90,6 @@ class Gameplay {
 
 		playground.create(viewportWidth)
 		piece = pieceBag.pop()
-
 		piece.spawn(System.currentTimeMillis(), playground.position(), playground.dimensions(), playground.cellSize())
 
 		if (!isGameThreadAlive()) {
@@ -339,6 +338,10 @@ class Gameplay {
 
 	@WorkerThread
 	private fun runLogic(now: Long) {
-
+		piece.fall(now, level.value)
+		if (piece.isAtTheBottom()) {
+			piece = pieceBag.pop()
+			piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
+		}
 	}
 }

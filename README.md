@@ -1,14 +1,6 @@
 # Blocks
 A Tetris-inspired game for Sidephone SP-01.
 
-## Tetris Fall Speed
-Level	sec/line
-00 		0.8s
-05 		0.46s
-10 		0.16s
-19 		0.03s
-29	 	0.016s
-
 ## Tetris Score System
 
 1 line: 2 * (1 + level)
