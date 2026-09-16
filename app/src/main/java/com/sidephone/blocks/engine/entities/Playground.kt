@@ -20,16 +20,13 @@ class Playground {
 
 		// Total width = 10 for columns + 4 for preview + 2 for preview padding = 16 blocks wide. There
 		// are two vertical separators on both sides, and one between the playground and the preview.
-		const val CELL_WIDTH = (Screen.WIDTH - 2 * Screen.VERTICAL_SEPARATOR_WIDTH) / 16 // virtual px
-		const val CELL_HEIGHT = CELL_WIDTH * 0.95f // virtual px
+		const val CELL_SIZE = (Screen.WIDTH - 2 * Screen.VERTICAL_SEPARATOR_WIDTH) / 16 // virtual px
 		const val COLUMNS = 10
-		const val ROWS = 24
-		const val ROWS_VISIBLE = 20
+		const val ROWS = 20
 	}
 
 	object Preview {
-		const val CELL_WIDTH = Playground.CELL_WIDTH
-		const val CELL_HEIGHT = Playground.CELL_HEIGHT
+		const val CELL_SIZE = Playground.CELL_SIZE
 		const val COLUMNS = 6
 		const val ROWS = 6
 	}
@@ -61,7 +58,10 @@ class Playground {
 	private var scoreboardLeft = 0f
 
 
+	fun cellSize() = Playground.CELL_SIZE
 	fun draw() = DrawCommandGroup(0f, 0f, 0f, drawCommands)
+	fun dimensions() = Pair(Playground.COLUMNS, Playground.ROWS)
+	fun position() = Pair(playgroundLeft, playgroundTop)
 	fun scoreboardPosition() = Pair(scoreboardLeft, scoreboardTop)
 	fun scoreboardWidth() = previewWidth
 
@@ -71,12 +71,12 @@ class Playground {
 
 		playgroundTop = Screen.PADDING_TOP * scale
 		playgroundLeft = Screen.VERTICAL_SEPARATOR_WIDTH * scale
-		playgroundWidth = Playground.COLUMNS * Playground.CELL_WIDTH * scale
-		playgroundHeight = Playground.ROWS_VISIBLE * Playground.CELL_HEIGHT * scale
+		playgroundWidth = Playground.COLUMNS * Playground.CELL_SIZE * scale
+		playgroundHeight = Playground.ROWS * Playground.CELL_SIZE * scale
 
 		previewLeft = playgroundLeft + playgroundWidth + Screen.VERTICAL_SEPARATOR_WIDTH * scale
-		previewWidth = Preview.COLUMNS * Preview.CELL_WIDTH * scale
-		previewHeight = Preview.ROWS * Preview.CELL_HEIGHT * scale
+		previewWidth = Preview.COLUMNS * Preview.CELL_SIZE * scale
+		previewHeight = Preview.ROWS * Preview.CELL_SIZE * scale
 
 		wallWidth = Screen.VERTICAL_SEPARATOR_WIDTH * scale
 
@@ -90,13 +90,13 @@ class Playground {
 	private fun drawGrid(scale: Float): List<DrawCommand> {
 		val commands = mutableListOf<DrawCommand>()
 
-		for (row in 0..Playground.ROWS_VISIBLE) {
-			val y = playgroundTop + row * Playground.CELL_HEIGHT * scale
+		for (row in 0..Playground.ROWS) {
+			val y = playgroundTop + row * Playground.CELL_SIZE * scale
 			commands.add(DrawCommand.Line(playgroundLeft, y, playgroundLeft + playgroundWidth, y, Playground.COLOR_GRID))
 		}
 
 		for (col in 0..Playground.COLUMNS) {
-			val x = playgroundLeft + col * Playground.CELL_WIDTH * scale
+			val x = playgroundLeft + col * Playground.CELL_SIZE * scale
 			commands.add(DrawCommand.Line(x, playgroundTop, x, playgroundTop + playgroundHeight, Playground.COLOR_GRID))
 		}
 
