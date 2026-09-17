@@ -63,11 +63,11 @@ abstract class Piece {
 	}
 
 
-	fun fall(now: Long, level: Int) {
+	fun fall(now: Long, level: Int, heapBlocks: List<Block>) {
 		if (isAtTheBottom) return
 
 		if (now - lastFallTime >= fallInterval(level)) {
-			moveDown()
+			moveDown(heapBlocks)
 			lastFallTime = now
 		}
 	}
@@ -91,11 +91,22 @@ abstract class Piece {
 	}
 
 
-	fun moveDown() {
-		if (y + bottom(orientation) < maxY)
-			y += 1
-		else
+	fun moveDown(heapBlocks: List<Block>) {
+		if (y + bottom(orientation) >= maxY) {
 			isAtTheBottom = true
+			return
+		}
+
+		for (block in blocks()) {
+			for (otherBlock in heapBlocks) {
+				if (block.gridX + x == otherBlock.gridX && block.gridY + y + 1 == otherBlock.gridY) {
+					isAtTheBottom = true
+					return
+				}
+			}
+		}
+
+		y += 1
 	}
 
 

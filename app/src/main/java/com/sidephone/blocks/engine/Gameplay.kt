@@ -313,7 +313,7 @@ class Gameplay {
 		val fallFaster = KeyEvent.KEYCODE_DPAD_DOWN in keys
 		if (fallFaster && !fallFasterPressed) {
 			fallFasterPressed = true
-			piece.moveDown()
+			piece.moveDown(blockHeap.getBlocks())
 		} else if (!fallFaster) {
 			fallFasterPressed = false
 		}
@@ -349,9 +349,9 @@ class Gameplay {
 
 	@WorkerThread
 	private fun runLogic(now: Long) {
-		piece.fall(now, level.value)
+		piece.fall(now, level.value, blockHeap.getBlocks())
 		if (piece.isAtTheBottom()) {
-			blockHeap.addAll(piece)
+			blockHeap.add(piece)
 			piece = pieceBag.pop()
 			piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
 		}

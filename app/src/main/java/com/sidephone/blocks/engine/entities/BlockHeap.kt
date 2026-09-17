@@ -13,9 +13,9 @@ class BlockHeap {
 	private val blocks = mutableListOf<Block>()
 
 
-	fun addAll(piece: Piece) {
+	fun add(piece: Piece) {
 		piece.blocks().forEach { block ->
-			blocks.add(block)
+			blocks.add(block.moveBy(piece.gridX(), piece.gridY()))
 			drawCommands.add(block.drawAt(
 				piece.calculateDrawPosition(Pair(0f, 0f), piece.gridX(), piece.gridY(), block.drawSize)
 			))
@@ -36,5 +36,10 @@ class BlockHeap {
 			0f,
 			drawCommands
 		)
+	}
+
+
+	fun getBlocks(): List<Block> {
+		return blocks
 	}
 }

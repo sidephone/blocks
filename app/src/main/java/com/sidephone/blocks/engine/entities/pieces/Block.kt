@@ -22,4 +22,9 @@ class Block(var gridX: Int, var gridY: Int, val drawSize: Float, val color: Int,
 			true
 		)
 	}
+
+
+	fun moveBy(dx: Int, dy: Int): Block {
+		return Block(gridX + dx, gridY + dy, drawSize, color, shiftX, shiftY)
+	}
 }
