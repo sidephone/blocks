@@ -297,7 +297,7 @@ class Gameplay {
 		val turnClockwise = (KeyEvent.KEYCODE_BUTTON_B in keys || KeyEvent.KEYCODE_DPAD_UP in keys)
 		if (turnClockwise && !turnClockwisePressed) {
 			turnClockwisePressed = true
-			piece.rotateClockwise()
+			piece.rotateClockwise(blockHeap.getBlocks())
 		} else if (!turnClockwise) {
 			turnClockwisePressed = false
 		}
@@ -305,7 +305,7 @@ class Gameplay {
 		val turnCounterClockwise = KeyEvent.KEYCODE_BUTTON_A in keys
 		if (turnCounterClockwise && !turnCounterClockwisePressed) {
 			turnCounterClockwisePressed = true
-			piece.rotateCounterClockwise()
+			piece.rotateCounterClockwise(blockHeap.getBlocks())
 		} else if (!turnCounterClockwise) {
 			turnCounterClockwisePressed = false
 		}

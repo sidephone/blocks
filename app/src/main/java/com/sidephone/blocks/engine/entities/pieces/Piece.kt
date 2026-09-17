@@ -13,7 +13,19 @@ abstract class Piece {
 		private val LOG_TAG = Piece::class.simpleName
 	}
 
-	private enum class NextMove { DOWN, LEFT, RIGHT }
+	private enum class NextMove(val offset: Pair<Int, Int>) {
+		DOWN(Pair(0, 1)),
+		LEFT(Pair(-1, 0)),
+		RIGHT(Pair(1, 0))
+	}
+
+	private val wallKickOffsets = listOf(
+		Pair(0, 0),
+		Pair(-1, 0), Pair(1, 0),
+		Pair(-2, 0), Pair(2, 0),
+		Pair(0, -1),
+		Pair(-1, -1), Pair(1, -1)
+	)
 
 	protected var blocks = emptyList<Block>()
 	private var blockSize = 0f // px
@@ -93,14 +105,9 @@ abstract class Piece {
 	}
 
 
-	private fun isNextMoveBlocked(heapBlocks: List<Block>, nextMove: NextMove): Boolean {
-		var nextX = x
-		var nextY = y
-		when (nextMove) {
-			NextMove.DOWN -> nextY += 1
-			NextMove.LEFT -> nextX -= 1
-			NextMove.RIGHT -> nextX += 1
-		}
+	private fun isBlocked(heapBlocks: List<Block>, nextMove: Pair<Int, Int>): Boolean {
+		val nextX = x + nextMove.first
+		val nextY = y + nextMove.second
 
 		for (block in blocks()) {
 			for (otherBlock in heapBlocks) {
@@ -114,8 +121,18 @@ abstract class Piece {
 	}
 
 
+	private fun isOutOfBounds(nextMove: Pair<Int, Int>): Boolean {
+		val nextX = x + nextMove.first
+		val nextY = y + nextMove.second
+
+		return nextX + left(orientation) < 0 ||
+			nextX + right(orientation) > maxX ||
+			nextY + bottom(orientation) > maxY
+	}
+
+
 	fun moveDown(heapBlocks: List<Block>) {
-		if (isAtTheBottom || y + bottom(orientation) >= maxY || isNextMoveBlocked(heapBlocks, NextMove.DOWN))
+		if (isAtTheBottom || y + bottom(orientation) >= maxY || isBlocked(heapBlocks, NextMove.DOWN.offset))
 			isAtTheBottom = true
 		else
 			y += 1
@@ -123,34 +140,36 @@ abstract class Piece {
 
 
 	fun moveLeft(heapBlocks: List<Block>) {
-		if (!isAtTheBottom && x + left(orientation) > 0 && !isNextMoveBlocked(heapBlocks, NextMove.LEFT))
+		if (!isAtTheBottom && x + left(orientation) > 0 && !isBlocked(heapBlocks, NextMove.LEFT.offset))
 			x -= 1
 	}
 
 
 	fun moveRight(heapBlocks: List<Block>) {
-		if (!isAtTheBottom && x + right(orientation) < maxX && !isNextMoveBlocked(heapBlocks, NextMove.RIGHT))
+		if (!isAtTheBottom && x + right(orientation) < maxX && !isBlocked(heapBlocks, NextMove.RIGHT.offset))
 			x += 1
 	}
 
 
-	open fun rotateClockwise() {
+	open fun rotateClockwise(heapBlocks: List<Block>) {
 		if (isAtTheBottom) return
 
+		val previous = orientation
 		orientation += 90
 		orientation %= 360
-		wallKick()
+		if (!wallKick(heapBlocks)) orientation = previous
 
 		Log.d(LOG_TAG, "position: ($x, $y) orientation: $orientation")
 	}
 
 
-	open fun rotateCounterClockwise() {
+	open fun rotateCounterClockwise(heapBlocks: List<Block>) {
 		if (isAtTheBottom) return
 
+		val previous = orientation
 		orientation -= 90
 		orientation = if (orientation < 0) orientation + 360 else orientation
-		wallKick()
+		if (!wallKick(heapBlocks)) orientation = previous
 
 		Log.d(LOG_TAG, "position: ($x, $y) orientation: $orientation")
 	}
@@ -181,17 +200,18 @@ abstract class Piece {
 	}
 
 
-	private fun wallKick() {
-		if (x + right(orientation) > maxX) {
-			x = maxX - right(orientation)
+	private fun wallKick(heapBlocks: List<Block>): Boolean {
+		val prevX = x
+		val prevY = y
+
+		for (offset in wallKickOffsets) {
+			if (!isOutOfBounds(offset) && !isBlocked(heapBlocks, offset)) {
+				x = prevX + offset.first
+				y = prevY + offset.second
+				return true
+			}
 		}
 
-		if (x + left(orientation) < 0) {
-			x = abs(left(orientation))
-		}
-
-		if (y + bottom(orientation) > maxY) {
-			y = maxY - bottom(orientation)
-		}
+		return false
 	}
 }
