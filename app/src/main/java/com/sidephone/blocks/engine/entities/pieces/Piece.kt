@@ -13,6 +13,8 @@ abstract class Piece {
 		private val LOG_TAG = Piece::class.simpleName
 	}
 
+	private enum class NextMove { DOWN, LEFT, RIGHT }
+
 	protected var blocks = emptyList<Block>()
 	private var blockSize = 0f // px
 	private var drawOrigin: Pair<Float, Float> = Pair(0f, 0f) // px
@@ -91,54 +93,44 @@ abstract class Piece {
 	}
 
 
-	fun moveDown(heapBlocks: List<Block>) {
-		if (isAtTheBottom) return
-
-		if (y + bottom(orientation) >= maxY) {
-			isAtTheBottom = true
-			return
+	private fun isNextMoveBlocked(heapBlocks: List<Block>, nextMove: NextMove): Boolean {
+		var nextX = x
+		var nextY = y
+		when (nextMove) {
+			NextMove.DOWN -> nextY += 1
+			NextMove.LEFT -> nextX -= 1
+			NextMove.RIGHT -> nextX += 1
 		}
 
 		for (block in blocks()) {
 			for (otherBlock in heapBlocks) {
-				if (block.gridX + x == otherBlock.gridX && block.gridY + y + 1 == otherBlock.gridY) {
-					isAtTheBottom = true
-					return
+				if (block.gridX + nextX == otherBlock.gridX && block.gridY + nextY == otherBlock.gridY) {
+					return true
 				}
 			}
 		}
 
-		y += 1
+		return false
+	}
+
+
+	fun moveDown(heapBlocks: List<Block>) {
+		if (isAtTheBottom || y + bottom(orientation) >= maxY || isNextMoveBlocked(heapBlocks, NextMove.DOWN))
+			isAtTheBottom = true
+		else
+			y += 1
 	}
 
 
 	fun moveLeft(heapBlocks: List<Block>) {
-		if (isAtTheBottom || x + left(orientation) <= 0) return
-
-		for (block in blocks()) {
-			for (otherBlock in heapBlocks) {
-				if (block.gridX + x - 1 == otherBlock.gridX && block.gridY + y == otherBlock.gridY) {
-					return
-				}
-			}
-		}
-
-		x -= 1
+		if (!isAtTheBottom && x + left(orientation) > 0 && !isNextMoveBlocked(heapBlocks, NextMove.LEFT))
+			x -= 1
 	}
 
 
 	fun moveRight(heapBlocks: List<Block>) {
-		if (isAtTheBottom || x + right(orientation) >= maxX) return
-
-		for (block in blocks()) {
-			for (otherBlock in heapBlocks) {
-				if (block.gridX + x + 1 == otherBlock.gridX && block.gridY + y == otherBlock.gridY) {
-					return
-				}
-			}
-		}
-
-		x += 1
+		if (!isAtTheBottom && x + right(orientation) < maxX && !isNextMoveBlocked(heapBlocks, NextMove.RIGHT))
+			x += 1
 	}
 
 
