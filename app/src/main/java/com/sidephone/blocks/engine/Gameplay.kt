@@ -1,12 +1,14 @@
 package com.sidephone.blocks.engine
 
-import android.content.Context
 import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.sidephone.blocks.engine.entities.Playground
+import com.sidephone.blocks.engine.entities.pieces.Piece
+import com.sidephone.blocks.engine.entities.pieces.PieceBag
+import com.sidephone.blocks.engine.entities.pieces.PieceI
 import com.sidephone.blocks.engine.graphics.DrawCommandGroup
 import com.sidephone.blocks.engine.graphics.GameFrame
 import com.sidephone.blocks.settings.Settings
@@ -21,7 +23,7 @@ import java.util.concurrent.TimeUnit
  * The main game engine class. It contains the game loop, input handling, and game state management.
  * It is designed to be simple and easy to understand, so you can modify it to create your own game.
  */
-class Gameplay(private var context: Context) {
+class Gameplay {
 	companion object {
 		private val LOG_TAG = Gameplay::class.java.simpleName
 	}
@@ -33,6 +35,12 @@ class Gameplay(private var context: Context) {
 
 	// input
 	@Volatile private var pressedKeys = setOf<Int>()
+
+	var fallFasterPressed = false
+	var leftPressed = false
+	var rightPressed = false
+	var turnClockwisePressed = false
+	var turnCounterClockwisePressed = false
 
 	// output
 	private var onStartButtonPressed = {}
@@ -55,6 +63,8 @@ class Gameplay(private var context: Context) {
 	@Volatile private var firstIteration = true
 
 	// game objects
+	private var piece: Piece = PieceI()
+	private var pieceBag = PieceBag()
 	private var playground = Playground()
 
 
@@ -78,8 +88,16 @@ class Gameplay(private var context: Context) {
 		_level.value = 0
 		_score.value = 0
 
-		playground.create(viewportWidth)
+		fallFasterPressed = false
+		leftPressed = false
+		rightPressed = false
+		turnClockwisePressed = false
+		turnCounterClockwisePressed = false
 
+
+		playground.create(viewportWidth)
+		piece = pieceBag.pop()
+		piece.spawn(System.currentTimeMillis(), playground.position(), playground.dimensions(), playground.cellSize())
 
 		if (!isGameThreadAlive()) {
 			if (!executor.isShutdown && !executor.isTerminated) {
@@ -245,7 +263,7 @@ class Gameplay(private var context: Context) {
 	private fun advance() {
 		try {
 			val now = System.currentTimeMillis()
-			processGameInput(now)
+			processGameInput()
 			runLogic(now)
 			render()
 		} catch (e: Exception) {
@@ -267,21 +285,51 @@ class Gameplay(private var context: Context) {
 
 
 	/**
-	 * Perform various actions, or set state based on the currently pressed keys. This is the first
-	 * step in the game loop. All following steps will use the state to calculate actions or draw
-	 * objects on the screen.
+	 * For each keypress, calls the appropriate game logic function exactly once.
 	 */
 	@WorkerThread
-	private fun processGameInput(now: Long) {
+	private fun processGameInput() {
 		val keys = pressedKeys.toSet() // make a copy for thread safety
 
-		val leftPressed = KeyEvent.KEYCODE_DPAD_LEFT in keys
-		val rightPressed = KeyEvent.KEYCODE_DPAD_RIGHT in keys
-		val fasterPressed = KeyEvent.KEYCODE_DPAD_DOWN in keys
-		val dropPressed = KeyEvent.KEYCODE_DPAD_UP in keys
+		val turnClockwise = (KeyEvent.KEYCODE_BUTTON_B in keys || KeyEvent.KEYCODE_DPAD_UP in keys)
+		if (turnClockwise && !turnClockwisePressed) {
+			turnClockwisePressed = true
+			piece.rotateClockwise()
+		} else if (!turnClockwise) {
+			turnClockwisePressed = false
+		}
 
 		val turnCounterClockwise = KeyEvent.KEYCODE_BUTTON_A in keys
-		val turnClockwise = KeyEvent.KEYCODE_BUTTON_B in keys
+		if (turnCounterClockwise && !turnCounterClockwisePressed) {
+			turnCounterClockwisePressed = true
+			piece.rotateCounterClockwise()
+		} else if (!turnCounterClockwise) {
+			turnCounterClockwisePressed = false
+		}
+
+		val fallFaster = KeyEvent.KEYCODE_DPAD_DOWN in keys
+		if (fallFaster && !fallFasterPressed) {
+			fallFasterPressed = true
+			piece.moveDown()
+		} else if (!fallFaster) {
+			fallFasterPressed = false
+		}
+
+		val left = KeyEvent.KEYCODE_DPAD_LEFT in keys
+		if (left && !leftPressed) {
+			leftPressed = true
+			piece.moveLeft()
+		} else if (!left) {
+			leftPressed = false
+		}
+
+		val right = KeyEvent.KEYCODE_DPAD_RIGHT in keys
+		if (right && !rightPressed) {
+			rightPressed = true
+			piece.moveRight()
+		} else if (!right) {
+			rightPressed = false
+		}
 	}
 
 
@@ -289,6 +337,7 @@ class Gameplay(private var context: Context) {
 	private fun render() {
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
+		screenObjects.add(piece.draw())
 
 		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
 	}
@@ -296,6 +345,10 @@ class Gameplay(private var context: Context) {
 
 	@WorkerThread
 	private fun runLogic(now: Long) {
-
+		piece.fall(now, level.value)
+		if (piece.isAtTheBottom()) {
+			piece = pieceBag.pop()
+			piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
+		}
 	}
 }

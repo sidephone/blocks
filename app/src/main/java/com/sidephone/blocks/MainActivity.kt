@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 		enableEdgeToEdge()
 		switchToFullScreen()
 
-		gameplay = Gameplay(this)
+		gameplay = Gameplay()
 		settings = Settings(this)
 
 		setContent {
