@@ -321,7 +321,7 @@ class Gameplay {
 		val left = KeyEvent.KEYCODE_DPAD_LEFT in keys
 		if (left && !leftPressed) {
 			leftPressed = true
-			piece.moveLeft()
+			piece.moveLeft(blockHeap.getBlocks())
 		} else if (!left) {
 			leftPressed = false
 		}
@@ -329,7 +329,7 @@ class Gameplay {
 		val right = KeyEvent.KEYCODE_DPAD_RIGHT in keys
 		if (right && !rightPressed) {
 			rightPressed = true
-			piece.moveRight()
+			piece.moveRight(blockHeap.getBlocks())
 		} else if (!right) {
 			rightPressed = false
 		}

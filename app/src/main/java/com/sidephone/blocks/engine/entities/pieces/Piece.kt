@@ -92,6 +92,8 @@ abstract class Piece {
 
 
 	fun moveDown(heapBlocks: List<Block>) {
+		if (isAtTheBottom) return
+
 		if (y + bottom(orientation) >= maxY) {
 			isAtTheBottom = true
 			return
@@ -110,13 +112,33 @@ abstract class Piece {
 	}
 
 
-	fun moveLeft() {
-		if (!isAtTheBottom && x + left(orientation) > 0) x -= 1
+	fun moveLeft(heapBlocks: List<Block>) {
+		if (isAtTheBottom || x + left(orientation) <= 0) return
+
+		for (block in blocks()) {
+			for (otherBlock in heapBlocks) {
+				if (block.gridX + x - 1 == otherBlock.gridX && block.gridY + y == otherBlock.gridY) {
+					return
+				}
+			}
+		}
+
+		x -= 1
 	}
 
 
-	fun moveRight() {
-		if (!isAtTheBottom && x + right(orientation) < maxX) x += 1
+	fun moveRight(heapBlocks: List<Block>) {
+		if (isAtTheBottom || x + right(orientation) >= maxX) return
+
+		for (block in blocks()) {
+			for (otherBlock in heapBlocks) {
+				if (block.gridX + x + 1 == otherBlock.gridX && block.gridY + y == otherBlock.gridY) {
+					return
+				}
+			}
+		}
+
+		x += 1
 	}
 
 
