@@ -4,7 +4,7 @@ import com.sidephone.blocks.engine.graphics.DrawCommand
 
 class PieceZ : Piece() {
 	companion object {
-		private const val COLOR = 0xFFF00F00.toInt() // red
+		private const val COLOR = 0xFFFF0000.toInt() // red
 	}
 
 	override fun bottom(orientation: Int) = when (orientation) {
