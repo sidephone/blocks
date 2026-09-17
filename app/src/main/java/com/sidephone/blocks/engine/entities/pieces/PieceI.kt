@@ -5,6 +5,7 @@ class PieceI : Piece() {
 		private const val COLOR = 0xFF00FFFF.toInt() // cyan
 	}
 
+
 	override fun bottom(orientation: Int): Int {
 		return when (orientation) {
 			0 -> 0
@@ -13,6 +14,7 @@ class PieceI : Piece() {
 			else -> 0
 		}
 	}
+
 
 	override fun left(orientation: Int): Int {
 		return when (orientation) {
@@ -23,6 +25,7 @@ class PieceI : Piece() {
 		}
 	}
 
+
 	override fun right(orientation: Int): Int {
 		return when (orientation) {
 			0, 180 -> 2
@@ -31,6 +34,19 @@ class PieceI : Piece() {
 			else -> 0
 		}
 	}
+
+
+	override fun blocks(): List<Block> {
+		return blocks.map { block ->
+			 when (orientation) {
+				90 -> Block(-block.gridY - 1, block.gridX, block.drawSize, block.color, block.shiftX, block.shiftY)
+				180 -> Block(-block.gridX - 1, -block.gridY - 1, block.drawSize, block.color, block.shiftX, block.shiftY)
+				270 -> Block(block.gridY, -block.gridX - 1, block.drawSize, block.color, block.shiftX, block.shiftY)
+				else -> block
+			}
+		}
+	}
+
 
 	override fun blocks(drawSize: Float): List<Block> {
 		return listOf(
@@ -41,12 +57,14 @@ class PieceI : Piece() {
 		)
 	}
 
+
 	override fun calculateDrawPosition(drawOrigin: Pair<Float, Float>, gridX: Int, gridY: Int, blockSize: Float): Pair<Float, Float> {
 		return Pair(
 			drawOrigin.first + gridX * blockSize,
 			drawOrigin.second + gridY * blockSize
 		)
 	}
+
 
 	override fun spawnPosition(gridDimensions: Pair<Int, Int>): Pair<Int, Int> {
 		return Pair(gridDimensions.first / 2, 1)

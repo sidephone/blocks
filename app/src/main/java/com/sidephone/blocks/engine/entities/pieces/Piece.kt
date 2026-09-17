@@ -13,6 +13,7 @@ abstract class Piece {
 		private val LOG_TAG = Piece::class.simpleName
 	}
 
+	protected var blocks = emptyList<Block>()
 	private var blockSize = 0f // px
 	private var drawOrigin: Pair<Float, Float> = Pair(0f, 0f) // px
 	private var isAtTheBottom = false
@@ -20,7 +21,7 @@ abstract class Piece {
 	private var maxY: Int = 0 // grid cells
 	private var x: Int = 0 // grid cells
 	private var y: Int = 0 // grid cells
-	private var orientation: Int = 0 // degrees
+	protected var orientation: Int = 0 // degrees
 
 	private var lastFallTime = 0L // ms
 
@@ -33,8 +34,25 @@ abstract class Piece {
 	protected abstract fun right(orientation: Int): Int
 
 
+	fun gridX() = x
+	fun gridY() = y
 	fun isAtTheBottom() = isAtTheBottom
 	protected open fun spawnPosition(gridDimensions: Pair<Int, Int>) = Pair(gridDimensions.first / 2 - 1, 1)
+
+
+	/**
+	 * Returns a block list with recalculated grid positions based on the piece orientation.
+	 */
+	open fun blocks(): List<Block> {
+		return blocks.map { block ->
+			 when (orientation) {
+				90 -> Block(-block.gridY, block.gridX, block.drawSize, block.color, block.shiftX, block.shiftY)
+				180 -> Block(-block.gridX, -block.gridY, block.drawSize, block.color, block.shiftX, block.shiftY)
+				270 -> Block(block.gridY, -block.gridX, block.drawSize, block.color, block.shiftX, block.shiftY)
+				else -> block
+			}
+		}
+	}
 
 
 	open fun calculateDrawPosition(drawOrigin: Pair<Float, Float>, gridX: Int, gridY: Int, blockSize: Float): Pair<Float, Float> {
@@ -131,7 +149,8 @@ abstract class Piece {
 			y = it.second
 		}
 
-		drawCommands = blocks(blockSize).map { it.draw() }
+		blocks = blocks(blockSize)
+		drawCommands = blocks.map { it.draw() }
 
 		lastFallTime = now
 	}

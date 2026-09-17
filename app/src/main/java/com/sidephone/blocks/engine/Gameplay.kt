@@ -5,6 +5,7 @@ import android.view.KeyEvent
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
+import com.sidephone.blocks.engine.entities.BlockHeap
 import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.entities.pieces.Piece
 import com.sidephone.blocks.engine.entities.PieceBag
@@ -63,6 +64,7 @@ class Gameplay {
 	@Volatile private var firstIteration = true
 
 	// game objects
+	private var blockHeap = BlockHeap()
 	private var piece: Piece = PieceI()
 	private var pieceBag = PieceBag()
 	private var playground = Playground()
@@ -96,6 +98,7 @@ class Gameplay {
 
 
 		playground.create(viewportWidth)
+		blockHeap.clear()
 		piece = pieceBag.pop()
 		piece.spawn(System.currentTimeMillis(), playground.position(), playground.dimensions(), playground.cellSize())
 
@@ -337,6 +340,7 @@ class Gameplay {
 	private fun render() {
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
+		screenObjects.add(blockHeap.draw(playground.position()))
 		screenObjects.add(piece.draw())
 
 		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
@@ -347,6 +351,7 @@ class Gameplay {
 	private fun runLogic(now: Long) {
 		piece.fall(now, level.value)
 		if (piece.isAtTheBottom()) {
+			blockHeap.addAll(piece)
 			piece = pieceBag.pop()
 			piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
 		}
