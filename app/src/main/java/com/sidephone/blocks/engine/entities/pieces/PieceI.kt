@@ -1,7 +1,5 @@
 package com.sidephone.blocks.engine.entities.pieces
 
-import com.sidephone.blocks.engine.graphics.DrawCommand
-
 class PieceI : Piece() {
 	companion object {
 		private const val COLOR = 0xFF00FFFF.toInt() // cyan
@@ -34,19 +32,19 @@ class PieceI : Piece() {
 		}
 	}
 
+	override fun blocks(drawSize: Float): List<Block> {
+		return listOf(
+			Block(-2, -1, drawSize, COLOR, 0.5f, 0.5f),
+			Block(-1, -1, drawSize, COLOR, 0.5f, 0.5f),
+			Block(0, -1, drawSize, COLOR, 0.5f, 0.5f),
+			Block(1, -1, drawSize, COLOR, 0.5f, 0.5f),
+		)
+	}
+
 	override fun calculateDrawPosition(drawOrigin: Pair<Float, Float>, gridX: Int, gridY: Int, blockSize: Float): Pair<Float, Float> {
 		return Pair(
 			drawOrigin.first + gridX * blockSize,
 			drawOrigin.second + gridY * blockSize
-		)
-	}
-
-	override fun drawBlocks(blockSize: Float): List<DrawCommand> {
-		return listOf(
-			Block.drawShifted(-2, -1, blockSize, COLOR, 0.5f, 0.5f),
-			Block.drawShifted(-1, -1, blockSize, COLOR, 0.5f, 0.5f),
-			Block.drawShifted(0, -1, blockSize, COLOR, 0.5f, 0.5f),
-			Block.drawShifted(1, -1, blockSize, COLOR, 0.5f, 0.5f),
 		)
 	}
 

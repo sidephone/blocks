@@ -1,10 +1,17 @@
 package com.sidephone.blocks.engine.entities.pieces
 
-import com.sidephone.blocks.engine.graphics.DrawCommand
-
 class PieceS : Piece() {
 	companion object {
 		private const val COLOR = 0xFF00FF00.toInt() // green
+	}
+
+	override fun blocks(drawSize: Float): List<Block> {
+		return listOf(
+			Block(0, -1, drawSize, COLOR),
+			Block(1, -1, drawSize, COLOR),
+			Block(-1, 0, drawSize, COLOR),
+			Block(0, 0, drawSize, COLOR)
+		)
 	}
 
 	override fun bottom(orientation: Int) = when (orientation) {
@@ -20,14 +27,5 @@ class PieceS : Piece() {
 	override fun right(orientation: Int) = when (orientation) {
 		0, 90, 180 -> 2
 		else -> 1
-	}
-
-	override fun drawBlocks(blockSize: Float): List<DrawCommand> {
-		return listOf(
-			Block.draw(0, -1, blockSize, COLOR),
-			Block.draw(1, -1, blockSize, COLOR),
-			Block.draw(-1, 0, blockSize, COLOR),
-			Block.draw(0, 0, blockSize, COLOR)
-		)
 	}
 }

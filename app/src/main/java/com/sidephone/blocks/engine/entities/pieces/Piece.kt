@@ -24,8 +24,10 @@ abstract class Piece {
 
 	private var lastFallTime = 0L // ms
 
+	private var drawCommands: List<DrawCommand> = emptyList()
 
-	protected abstract fun drawBlocks(blockSize: Float): List<DrawCommand>
+
+	protected abstract fun blocks(drawSize: Float): List<Block>
 	protected abstract fun bottom(orientation: Int): Int
 	protected abstract fun left(orientation: Int): Int
 	protected abstract fun right(orientation: Int): Int
@@ -113,7 +115,7 @@ abstract class Piece {
 
 	fun draw(): DrawCommandGroup {
 		val (drawX, drawY) = calculateDrawPosition(drawOrigin, x, y, blockSize)
-		return DrawCommandGroup(drawX,drawY,orientation.toFloat(),drawBlocks(blockSize))
+		return DrawCommandGroup(drawX,drawY,orientation.toFloat(), drawCommands)
 	}
 
 
@@ -128,6 +130,8 @@ abstract class Piece {
 			x = it.first
 			y = it.second
 		}
+
+		drawCommands = blocks(blockSize).map { it.draw() }
 
 		lastFallTime = now
 	}
