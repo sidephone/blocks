@@ -92,8 +92,8 @@ abstract class Piece {
 	open fun rotateClockwise() {
 		if (isAtTheBottom) return
 
-		orientation -= 90
-		orientation = if (orientation < 0) orientation + 360 else orientation
+		orientation += 90
+		orientation %= 360
 		wallKick()
 
 		Log.d(LOG_TAG, "position: ($x, $y) orientation: $orientation")
@@ -103,8 +103,8 @@ abstract class Piece {
 	open fun rotateCounterClockwise() {
 		if (isAtTheBottom) return
 
-		orientation += 90
-		orientation %= 360
+		orientation -= 90
+		orientation = if (orientation < 0) orientation + 360 else orientation
 		wallKick()
 
 		Log.d(LOG_TAG, "position: ($x, $y) orientation: $orientation")
