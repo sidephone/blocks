@@ -29,16 +29,16 @@ abstract class Piece {
 	protected abstract fun bottom(orientation: Int): Int
 	protected abstract fun left(orientation: Int): Int
 	protected abstract fun right(orientation: Int): Int
-	protected abstract fun spawnPosition(gridDimensions: Pair<Int, Int>): Pair<Int, Int>
 
 
 	fun isAtTheBottom() = isAtTheBottom
+	protected open fun spawnPosition(gridDimensions: Pair<Int, Int>) = Pair(gridDimensions.first / 2 - 1, 1)
 
 
-	fun calculateDrawPosition(): Pair<Float, Float> {
+	open fun calculateDrawPosition(drawOrigin: Pair<Float, Float>, gridX: Int, gridY: Int, blockSize: Float): Pair<Float, Float> {
 		return Pair(
-			drawOrigin.first + x * blockSize,
-			drawOrigin.second + y * blockSize
+			drawOrigin.first + gridX * blockSize + blockSize / 2,
+			drawOrigin.second + gridY * blockSize + blockSize / 2
 		)
 	}
 
@@ -89,7 +89,7 @@ abstract class Piece {
 	}
 
 
-	fun rotateClockwise() {
+	open fun rotateClockwise() {
 		if (isAtTheBottom) return
 
 		orientation -= 90
@@ -100,7 +100,7 @@ abstract class Piece {
 	}
 
 
-	fun rotateCounterClockwise() {
+	open fun rotateCounterClockwise() {
 		if (isAtTheBottom) return
 
 		orientation += 90
@@ -112,8 +112,8 @@ abstract class Piece {
 
 
 	fun draw(): DrawCommandGroup {
-		val (x, y) = calculateDrawPosition()
-		return DrawCommandGroup(x, y, orientation.toFloat(), drawBlocks(blockSize))
+		val (drawX, drawY) = calculateDrawPosition(drawOrigin, x, y, blockSize)
+		return DrawCommandGroup(drawX,drawY,orientation.toFloat(),drawBlocks(blockSize))
 	}
 
 
@@ -141,8 +141,8 @@ abstract class Piece {
 			x = abs(left(orientation))
 		}
 
-		if (y + bottom(orientation) >= maxY) {
-			y = maxY - bottom(orientation) - 1
+		if (y + bottom(orientation) > maxY) {
+			y = maxY - bottom(orientation)
 		}
 	}
 }

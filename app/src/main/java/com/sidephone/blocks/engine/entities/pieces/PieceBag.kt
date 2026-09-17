@@ -1,19 +1,26 @@
 package com.sidephone.blocks.engine.entities.pieces
 
 class PieceBag {
-	private val pieceTypes: List<() -> Piece> = listOf { PieceI() }
+	private val pieceTypes: List<Piece> = listOf(
+		PieceI(),
+		PieceJ(),
+		PieceL(),
+		PieceO(),
+		PieceS(),
+		PieceT(),
+		PieceZ(),
+	)
 
 	private val pieces: MutableList<Piece> = mutableListOf()
+	private var last: Piece? = null
 
 
 	fun shuffle() {
-		val last: Piece? = if (pieces.isNotEmpty()) pieces.last() else null
-
 		pieces.clear()
-		pieces.addAll(pieceTypes.map { it() })
+		pieces.addAll(pieceTypes)
 		do {
 			pieces.shuffle()
-		} while (last != null && pieces.first()::class == last::class)
+		} while (last is Piece && pieces.first()::class == last!!::class)
 	}
 
 
@@ -21,6 +28,9 @@ class PieceBag {
 		if (pieces.isEmpty()) {
 			shuffle()
 		}
-		return pieces.removeAt(0)
+
+		val piece = pieces.removeAt(0)
+		last = piece
+		return piece
 	}
 }
