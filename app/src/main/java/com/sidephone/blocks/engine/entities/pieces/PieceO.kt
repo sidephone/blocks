@@ -1,7 +1,5 @@
 package com.sidephone.blocks.engine.entities.pieces
 
-import com.sidephone.blocks.engine.entities.BlockHeap
-
 class PieceO : Piece() {
 	companion object {
 		private const val COLOR = 0xFFFFFF00.toInt() // yellow

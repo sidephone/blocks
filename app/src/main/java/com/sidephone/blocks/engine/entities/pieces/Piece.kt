@@ -3,7 +3,6 @@ package com.sidephone.blocks.engine.entities.pieces
 import android.util.Log
 import com.sidephone.blocks.engine.graphics.DrawCommand
 import com.sidephone.blocks.engine.graphics.DrawCommandGroup
-import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.pow
 import kotlin.math.roundToLong

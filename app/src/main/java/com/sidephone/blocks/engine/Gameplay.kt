@@ -5,7 +5,7 @@ import android.view.KeyEvent
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
-import com.sidephone.blocks.engine.entities.BlockHeap
+import com.sidephone.blocks.engine.entities.BottomHeap
 import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.entities.pieces.Piece
 import com.sidephone.blocks.engine.entities.PieceBag
@@ -64,7 +64,7 @@ class Gameplay {
 	@Volatile private var firstIteration = true
 
 	// game objects
-	private var blockHeap = BlockHeap()
+	private var bottomHeap = BottomHeap()
 	private var piece: Piece = PieceI()
 	private var pieceBag = PieceBag()
 	private var playground = Playground()
@@ -96,9 +96,8 @@ class Gameplay {
 		turnClockwisePressed = false
 		turnCounterClockwisePressed = false
 
-
 		playground.create(viewportWidth)
-		blockHeap.clear()
+		bottomHeap.reset(playground.dimensions(), playground.cellSize())
 		piece = pieceBag.pop()
 		piece.spawn(System.currentTimeMillis(), playground.position(), playground.dimensions(), playground.cellSize())
 
@@ -158,13 +157,13 @@ class Gameplay {
 		engineLooper = executor.scheduleWithFixedDelay(
 			{ advance() },
 			0,
-			1_000_000_000L / Settings.Gameplay.TARGET_IPS,
+			1_000_000_000L / Settings.Engine.TARGET_IPS,
 			TimeUnit.NANOSECONDS
 		)
 
 		onStarted()
 
-		Log.d(LOG_TAG, "Gameplay loop started at ${Settings.Gameplay.TARGET_IPS} iterations per second")
+		Log.d(LOG_TAG, "Gameplay loop started at ${Settings.Engine.TARGET_IPS} iterations per second")
 	}
 
 
@@ -297,7 +296,7 @@ class Gameplay {
 		val turnClockwise = (KeyEvent.KEYCODE_BUTTON_B in keys || KeyEvent.KEYCODE_DPAD_UP in keys)
 		if (turnClockwise && !turnClockwisePressed) {
 			turnClockwisePressed = true
-			piece.rotateClockwise(blockHeap.getBlocks())
+			piece.rotateClockwise(bottomHeap.getBlocks())
 		} else if (!turnClockwise) {
 			turnClockwisePressed = false
 		}
@@ -305,7 +304,7 @@ class Gameplay {
 		val turnCounterClockwise = KeyEvent.KEYCODE_BUTTON_A in keys
 		if (turnCounterClockwise && !turnCounterClockwisePressed) {
 			turnCounterClockwisePressed = true
-			piece.rotateCounterClockwise(blockHeap.getBlocks())
+			piece.rotateCounterClockwise(bottomHeap.getBlocks())
 		} else if (!turnCounterClockwise) {
 			turnCounterClockwisePressed = false
 		}
@@ -313,7 +312,7 @@ class Gameplay {
 		val fallFaster = KeyEvent.KEYCODE_DPAD_DOWN in keys
 		if (fallFaster && !fallFasterPressed) {
 			fallFasterPressed = true
-			piece.moveDown(blockHeap.getBlocks())
+			piece.moveDown(bottomHeap.getBlocks())
 		} else if (!fallFaster) {
 			fallFasterPressed = false
 		}
@@ -321,7 +320,7 @@ class Gameplay {
 		val left = KeyEvent.KEYCODE_DPAD_LEFT in keys
 		if (left && !leftPressed) {
 			leftPressed = true
-			piece.moveLeft(blockHeap.getBlocks())
+			piece.moveLeft(bottomHeap.getBlocks())
 		} else if (!left) {
 			leftPressed = false
 		}
@@ -329,7 +328,7 @@ class Gameplay {
 		val right = KeyEvent.KEYCODE_DPAD_RIGHT in keys
 		if (right && !rightPressed) {
 			rightPressed = true
-			piece.moveRight(blockHeap.getBlocks())
+			piece.moveRight(bottomHeap.getBlocks())
 		} else if (!right) {
 			rightPressed = false
 		}
@@ -340,7 +339,7 @@ class Gameplay {
 	private fun render() {
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
-		screenObjects.add(blockHeap.draw(playground.position()))
+		screenObjects.add(bottomHeap.draw(playground.position()))
 		screenObjects.add(piece.draw())
 
 		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
@@ -349,11 +348,19 @@ class Gameplay {
 
 	@WorkerThread
 	private fun runLogic(now: Long) {
-		piece.fall(now, level.value, blockHeap.getBlocks())
-		if (piece.isAtTheBottom()) {
-			blockHeap.add(piece)
-			piece = pieceBag.pop()
-			piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
+		piece.fall(now, level.value, bottomHeap.getBlocks())
+		if (!piece.isAtTheBottom()) return
+
+		bottomHeap.add(piece)
+		bottomHeap.clearCompleteLines().let { linesCleared ->
+			if (linesCleared.isNotEmpty()) {
+				bottomHeap.moveDownLines(linesCleared)
+				_lines.value += linesCleared.size
+				_level.value = _lines.value / Settings.Gameplay.LINES_PER_LEVEL
+			}
 		}
+
+		piece = pieceBag.pop()
+		piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
 	}
 }
