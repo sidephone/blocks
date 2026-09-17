@@ -35,12 +35,12 @@ class Gameplay {
 
 	// input
 	@Volatile private var pressedKeys = setOf<Int>()
-	var turnCounterClockwisePressed = false
-	var turnClockwisePressed = false
 
+	var fallFasterPressed = false
 	var leftPressed = false
 	var rightPressed = false
-	var fallFasterPressed = false
+	var turnClockwisePressed = false
+	var turnCounterClockwisePressed = false
 
 	// output
 	private var onStartButtonPressed = {}
@@ -87,6 +87,13 @@ class Gameplay {
 		_lines.value = 0
 		_level.value = 0
 		_score.value = 0
+
+		fallFasterPressed = false
+		leftPressed = false
+		rightPressed = false
+		turnClockwisePressed = false
+		turnCounterClockwisePressed = false
+
 
 		playground.create(viewportWidth)
 		piece = pieceBag.pop()

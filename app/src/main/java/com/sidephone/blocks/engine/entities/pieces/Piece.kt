@@ -123,6 +123,7 @@ abstract class Piece {
 		isAtTheBottom = false
 		maxX = gridDimensions.first
 		maxY = gridDimensions.second
+		orientation = 0
 		spawnPosition(gridDimensions).let {
 			x = it.first
 			y = it.second

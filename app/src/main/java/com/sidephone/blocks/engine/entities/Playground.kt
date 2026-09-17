@@ -26,7 +26,6 @@ class Playground {
 	}
 
 	object Preview {
-		const val CELL_SIZE = Playground.CELL_SIZE
 		const val COLUMNS = 6
 		const val ROWS = 6
 	}
@@ -44,6 +43,8 @@ class Playground {
 
 	private var drawCommands: List<DrawCommand> = emptyList()
 
+	private var cellSize = 0f
+
 	private var playgroundTop = 0f
 	private var playgroundLeft = 0f
 	private var playgroundWidth = 0f
@@ -58,7 +59,7 @@ class Playground {
 	private var scoreboardLeft = 0f
 
 
-	fun cellSize() = Playground.CELL_SIZE
+	fun cellSize() = cellSize
 	fun draw() = DrawCommandGroup(0f, 0f, 0f, drawCommands)
 	fun dimensions() = Pair(Playground.COLUMNS, Playground.ROWS)
 	fun position() = Pair(playgroundLeft, playgroundTop)
@@ -69,14 +70,16 @@ class Playground {
 	fun create(viewportWidth: Float) {
 		val scale = viewportWidth / Screen.WIDTH
 
+		cellSize = Playground.CELL_SIZE * scale
+
 		playgroundTop = Screen.PADDING_TOP * scale
 		playgroundLeft = Screen.VERTICAL_SEPARATOR_WIDTH * scale
-		playgroundWidth = Playground.COLUMNS * Playground.CELL_SIZE * scale
-		playgroundHeight = Playground.ROWS * Playground.CELL_SIZE * scale
+		playgroundWidth = Playground.COLUMNS * cellSize
+		playgroundHeight = Playground.ROWS * cellSize
 
 		previewLeft = playgroundLeft + playgroundWidth + Screen.VERTICAL_SEPARATOR_WIDTH * scale
-		previewWidth = Preview.COLUMNS * Preview.CELL_SIZE * scale
-		previewHeight = Preview.ROWS * Preview.CELL_SIZE * scale
+		previewWidth = Preview.COLUMNS * cellSize
+		previewHeight = Preview.ROWS * cellSize
 
 		wallWidth = Screen.VERTICAL_SEPARATOR_WIDTH * scale
 
