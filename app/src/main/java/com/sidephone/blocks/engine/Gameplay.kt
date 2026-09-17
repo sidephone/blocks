@@ -7,7 +7,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.entities.pieces.Piece
-import com.sidephone.blocks.engine.entities.pieces.PieceBag
+import com.sidephone.blocks.engine.entities.PieceBag
 import com.sidephone.blocks.engine.entities.pieces.PieceI
 import com.sidephone.blocks.engine.graphics.DrawCommandGroup
 import com.sidephone.blocks.engine.graphics.GameFrame
