@@ -13,23 +13,24 @@ abstract class Piece {
 		private val LOG_TAG = Piece::class.simpleName
 	}
 
-	protected var blockSize = 0f
-	private var drawOrigin: Pair<Float, Float> = Pair(0f, 0f)
+	private var blockSize = 0f // px
+	private var drawOrigin: Pair<Float, Float> = Pair(0f, 0f) // px
 	private var isAtTheBottom = false
-	private var maxX: Int = 0
-	private var maxY: Int = 0
-	private var x: Int = 0
-	private var y: Int = 0
-	protected var orientation: Int = 0
+	private var maxX: Int = 0 // grid cells
+	private var maxY: Int = 0 // grid cells
+	private var x: Int = 0 // grid cells
+	private var y: Int = 0 // grid cells
+	private var orientation: Int = 0 // degrees
 
-	private var lastFallTime = 0L
+	private var lastFallTime = 0L // ms
 
 
-	protected abstract fun drawBlocks(): List<DrawCommand>
-	protected abstract fun bottom(): Int
-	protected abstract fun left(): Int
-	protected abstract fun right(): Int
+	protected abstract fun drawBlocks(blockSize: Float): List<DrawCommand>
+	protected abstract fun bottom(orientation: Int): Int
+	protected abstract fun left(orientation: Int): Int
+	protected abstract fun right(orientation: Int): Int
 	protected abstract fun spawnPosition(gridDimensions: Pair<Int, Int>): Pair<Int, Int>
+
 
 	fun isAtTheBottom() = isAtTheBottom
 
@@ -71,7 +72,7 @@ abstract class Piece {
 
 
 	fun moveDown() {
-		if (y + bottom() < maxY)
+		if (y + bottom(orientation) < maxY)
 			y += 1
 		else
 			isAtTheBottom = true
@@ -79,12 +80,12 @@ abstract class Piece {
 
 
 	fun moveLeft() {
-		if (!isAtTheBottom && x + left() > 0) x -= 1
+		if (!isAtTheBottom && x + left(orientation) > 0) x -= 1
 	}
 
 
 	fun moveRight() {
-		if (!isAtTheBottom && x + right() < maxX) x += 1
+		if (!isAtTheBottom && x + right(orientation) < maxX) x += 1
 	}
 
 
@@ -112,7 +113,7 @@ abstract class Piece {
 
 	fun draw(): DrawCommandGroup {
 		val (x, y) = calculateDrawPosition()
-		return DrawCommandGroup(x, y, orientation.toFloat(), drawBlocks())
+		return DrawCommandGroup(x, y, orientation.toFloat(), drawBlocks(blockSize))
 	}
 
 
@@ -132,16 +133,16 @@ abstract class Piece {
 
 
 	private fun wallKick() {
-		if (x + right() > maxX) {
-			x = maxX - right()
+		if (x + right(orientation) > maxX) {
+			x = maxX - right(orientation)
 		}
 
-		if (x + left() < 0) {
-			x = abs(left())
+		if (x + left(orientation) < 0) {
+			x = abs(left(orientation))
 		}
 
-		if (y + bottom() >= maxY) {
-			y = maxY - bottom() - 1
+		if (y + bottom(orientation) >= maxY) {
+			y = maxY - bottom(orientation) - 1
 		}
 	}
 }

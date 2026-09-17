@@ -1,28 +1,26 @@
 package com.sidephone.blocks.engine.entities.pieces
 
-import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.graphics.DrawCommand
 
 class PieceI : Piece() {
-	object Color {
-		const val FILL = 0xFF00FFFF.toInt() // Cyan
-		const val OUTLINE = Playground.BACKGROUND
+	companion object {
+		private const val COLOR = 0xFF00FFFF.toInt() // Cyan
 	}
 
-	override fun drawBlocks(): List<DrawCommand> {
-		return listOf(
-			// fill color
-//			DrawCommand.Rect(-2 * blockSize, -2 * blockSize, 2 * blockSize, 2 * blockSize, 0f, Color.FILL, false),
 
-			DrawCommand.Rect(-2 * blockSize, -blockSize, -blockSize, 0f, 0f, Color.FILL, false),
-			DrawCommand.Rect(-2 * blockSize, -blockSize, 0f, 0f, 0f, Color.FILL, false),
-			DrawCommand.Rect(-2 * blockSize, -blockSize, blockSize, 0f, 0f, Color.FILL, false),
-			DrawCommand.Rect(-2 * blockSize, -blockSize, 2 * blockSize, 0f, 0f, Color.FILL, false),
+	override fun drawBlocks(blockSize: Float): List<DrawCommand> {
+		// The coordinates are in a local coordinate system, defined by the piece DrawCommandGroup.
+		// The unit is a grid cell, not a pixel.
+		return listOf(
+			Block.draw(-2, -1, blockSize, COLOR),
+			Block.draw(-1, -1, blockSize, COLOR),
+			Block.draw(0, -1, blockSize, COLOR),
+			Block.draw(1, -1, blockSize, COLOR),
 		)
 	}
 
 
-	override fun bottom(): Int {
+	override fun bottom(orientation: Int): Int {
 		return when (orientation) {
 			0 -> 0
 			90, 270 -> 2
@@ -32,7 +30,7 @@ class PieceI : Piece() {
 	}
 
 
-	override fun left(): Int {
+	override fun left(orientation: Int): Int {
 		return when (orientation) {
 			0, 180 -> -2
 			90 -> 0
@@ -41,7 +39,7 @@ class PieceI : Piece() {
 		}
 	}
 
-	override fun right(): Int {
+	override fun right(orientation: Int): Int {
 		return when (orientation) {
 			0, 180 -> 2
 			90 -> 1
