@@ -11,6 +11,10 @@
 	<string name="main_settings">Settings</string>
 	<string name="main_exit">Exit</string>
 
+	<string name="setting_ghost_piece">Ghost Piece</string>
+	<string name="setting_ghost_piece_summary_on">Show a ghost piece to indicate where the current piece will land.</string>
+	<string name="setting_ghost_piece_summary_off">Do not show a ghost piece.</string>
+
 	<string name="scoreboard_high_score">HIGH</string>
 	<string name="scoreboard_level">LEVEL</string>
 	<string name="scoreboard_lines">LINES</string>

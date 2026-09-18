@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
  * The main game engine class. It contains the game loop, input handling, and game state management.
  * It is designed to be simple and easy to understand, so you can modify it to create your own game.
  */
-class Gameplay {
+class Gameplay(private val settings: Settings) {
 	companion object {
 		private val LOG_TAG = Gameplay::class.java.simpleName
 	}
@@ -431,13 +431,17 @@ class Gameplay {
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
 		screenObjects.add(bottomHeap.draw(playground.position()))
-		ghost.draw(piece, bottomHeap.peaks()).let { obj -> if (obj != null) screenObjects.add(obj) }
 		screenObjects.add(piece.draw())
+
 		screenObjects.add(PreviewWindow.drawNextPiece(
 			pieceBag.peek(),
 			playground.previewPosition(),
 			playground.cellSize()
 		))
+
+		if (settings.ghostPiece()) {
+			ghost.draw(piece, bottomHeap.peaks()).let { obj -> if (obj != null) screenObjects.add(obj) }
+		}
 
 		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
 	}
