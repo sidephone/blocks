@@ -10,6 +10,7 @@ import kotlin.math.roundToLong
 abstract class Piece {
 	companion object {
 		private val LOG_TAG = Piece::class.simpleName
+		const val MIN_FALL_INTERVAL = 16L // ms per line
 	}
 
 	private enum class NextMove(val offset: Pair<Int, Int>) {
@@ -30,6 +31,7 @@ abstract class Piece {
 	private var blockSize = 0f // px
 	private var drawOrigin: Pair<Float, Float> = Pair(0f, 0f) // px
 	private var isAtTheBottom = false
+	private var isDroppingHard = false
 	private var maxX: Int = 0 // grid cells
 	private var maxY: Int = 0 // grid cells
 	private var x: Int = 0 // grid cells
@@ -116,9 +118,16 @@ abstract class Piece {
 	 * The approximation is: 16 + 785 * e^(-(level / 7.2)^1.46)
 	 */
 	fun fallInterval(level: Int): Long {
+		if (isDroppingHard) return MIN_FALL_INTERVAL
+
 		val saneLevel: Double = (if (level < 0) 0 else level).toDouble()
-		val dt = 16 + 785 * exp(-((saneLevel / 7.2).pow(1.46)))
-		return dt.roundToLong().coerceAtLeast(16L)
+		val dt = MIN_FALL_INTERVAL + 785 * exp(-((saneLevel / 7.2).pow(1.46)))
+		return dt.roundToLong().coerceAtLeast(MIN_FALL_INTERVAL)
+	}
+
+
+	fun hardDrop() {
+		if (!isAtTheBottom) isDroppingHard = true
 	}
 
 
@@ -196,6 +205,7 @@ abstract class Piece {
 		blockSize = gridCellSize
 		drawOrigin = gridPosition
 		isAtTheBottom = false
+		isDroppingHard = false
 		maxX = gridDimensions.first
 		maxY = gridDimensions.second
 		orientation = 0

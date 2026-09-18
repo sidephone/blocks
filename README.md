@@ -11,6 +11,5 @@ A Tetris-inspired game for Sidephone SP-01.
 10 lines = next level
 
 # TODO
-- shortcut key for hard drop
 - ghost piece
 - logo, icon, colors

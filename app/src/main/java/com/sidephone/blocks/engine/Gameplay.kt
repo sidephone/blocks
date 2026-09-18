@@ -36,8 +36,10 @@ class Gameplay {
 
 	// input
 	@Volatile private var pressedKeys = setOf<Int>()
+	@Volatile private var remapInputForSundial = false
 
 	var downPressed = false
+	var hardDropPressed = false
 	var leftPressed = false
 	var rightPressed = false
 	var turnClockwisePressed = false
@@ -92,6 +94,7 @@ class Gameplay {
 	@MainThread
 	fun reset() {
 		pressedKeys = setOf()
+		remapInputForSundial = false
 
 		_gameOver.value = false
 		_lines.value = 0
@@ -99,6 +102,7 @@ class Gameplay {
 		_score.value = 0
 
 		downPressed = false
+		hardDropPressed = false
 		leftPressed = false
 		rightPressed = false
 		turnClockwisePressed = false
@@ -132,8 +136,9 @@ class Gameplay {
 	 * @param keys The set of currently pressed keys represented by their KeyEvent key codes.
 	 */
 	@MainThread
-	fun onPressedKeys(keys: Set<Int>) {
+	fun onPressedKeys(keys: Set<Int>, isSundialConnected: Boolean) {
 		pressedKeys = keys.toSet() // make a copy for thread safety
+		remapInputForSundial = isSundialConnected
 		preprocessInput()
 	}
 
@@ -292,7 +297,12 @@ class Gameplay {
 	 */
 	@MainThread
 	private fun preprocessInput() {
-		if (KeyEvent.KEYCODE_BUTTON_START in pressedKeys) {
+		if (
+			KeyEvent.KEYCODE_BUTTON_START in pressedKeys ||
+			KeyEvent.KEYCODE_DPAD_CENTER in pressedKeys ||
+			KeyEvent.KEYCODE_ENTER in pressedKeys ||
+			KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE in pressedKeys
+		) {
 			onStartButton()
 		}
 	}
@@ -325,7 +335,14 @@ class Gameplay {
 	private fun processGameInput(now: Long) {
 		val keys = pressedKeys.toSet() // make a copy for thread safety
 
-		val turnClockwise = (KeyEvent.KEYCODE_BUTTON_B in keys || KeyEvent.KEYCODE_DPAD_UP in keys)
+		val turnClockwise = (remapInputForSundial && KeyEvent.KEYCODE_DPAD_LEFT in keys)
+			|| KeyEvent.KEYCODE_BUTTON_B in keys
+			|| KeyEvent.KEYCODE_DPAD_UP in keys
+			|| KeyEvent.KEYCODE_Q in keys
+			|| KeyEvent.KEYCODE_T in keys
+			|| KeyEvent.KEYCODE_1 in keys
+			|| KeyEvent.KEYCODE_2 in keys
+
 		if (turnClockwise && !turnClockwisePressed) {
 			turnClockwisePressed = true
 			piece.rotateClockwise(bottomHeap.getBlocks())
@@ -333,7 +350,11 @@ class Gameplay {
 			turnClockwisePressed = false
 		}
 
-		val turnCounterClockwise = KeyEvent.KEYCODE_BUTTON_A in keys
+		val turnCounterClockwise = (remapInputForSundial && KeyEvent.KEYCODE_DPAD_RIGHT in keys)
+			|| KeyEvent.KEYCODE_BUTTON_A in keys
+			|| KeyEvent.KEYCODE_O in keys
+			|| KeyEvent.KEYCODE_3 in keys
+
 		if (turnCounterClockwise && !turnCounterClockwisePressed) {
 			turnCounterClockwisePressed = true
 			piece.rotateCounterClockwise(bottomHeap.getBlocks())
@@ -342,6 +363,9 @@ class Gameplay {
 		}
 
 		val down = KeyEvent.KEYCODE_DPAD_DOWN in keys
+			|| KeyEvent.KEYCODE_8 in keys
+			|| KeyEvent.KEYCODE_B in keys
+
 		if (down && !downPressed) {
 			downPressed = true
 			piece.moveDown(bottomHeap.getBlocks())
@@ -355,7 +379,23 @@ class Gameplay {
 			downPressed = false
 		}
 
+		val hardDrop = KeyEvent.KEYCODE_BUTTON_Y in keys
+			|| KeyEvent.KEYCODE_0 in keys
+			|| KeyEvent.KEYCODE_SPACE in keys
+			|| KeyEvent.KEYCODE_TAB in keys // sundial bottom left button
+
+		if (hardDrop && !hardDropPressed) {
+			hardDropPressed = true
+			piece.hardDrop()
+		} else if (!hardDrop) {
+			hardDropPressed = false
+		}
+
 		val left = KeyEvent.KEYCODE_DPAD_LEFT in keys
+			|| KeyEvent.KEYCODE_4 in keys
+			|| KeyEvent.KEYCODE_D in keys
+			|| KeyEvent.KEYCODE_MEDIA_PREVIOUS in keys
+
 		if (left && !leftPressed) {
 			leftPressed = true
 			piece.moveLeft(bottomHeap.getBlocks())
@@ -370,6 +410,10 @@ class Gameplay {
 		}
 
 		val right = KeyEvent.KEYCODE_DPAD_RIGHT in keys
+			|| KeyEvent.KEYCODE_6 in keys
+			|| KeyEvent.KEYCODE_J in keys
+			|| KeyEvent.KEYCODE_MEDIA_NEXT in keys
+
 		if (right && !rightPressed) {
 			rightPressed = true
 			piece.moveRight(bottomHeap.getBlocks())
