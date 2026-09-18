@@ -37,11 +37,15 @@ class Gameplay {
 	// input
 	@Volatile private var pressedKeys = setOf<Int>()
 
-	var fallFasterPressed = false
+	var downPressed = false
 	var leftPressed = false
 	var rightPressed = false
 	var turnClockwisePressed = false
 	var turnCounterClockwisePressed = false
+
+	var nextDownRepeat = 0L
+	var nextLeftRepeat = 0L
+	var nextRightRepeat = 0L
 
 	// output
 	private var onStartButtonPressed = {}
@@ -94,11 +98,15 @@ class Gameplay {
 		_level.value = 0
 		_score.value = 0
 
-		fallFasterPressed = false
+		downPressed = false
 		leftPressed = false
 		rightPressed = false
 		turnClockwisePressed = false
 		turnCounterClockwisePressed = false
+
+		nextDownRepeat = 0L
+		nextLeftRepeat = 0L
+		nextRightRepeat = 0L
 
 		playground.create(viewportWidth)
 		bottomHeap.reset(playground.dimensions(), playground.cellSize())
@@ -269,7 +277,7 @@ class Gameplay {
 	private fun advance() {
 		try {
 			val now = System.currentTimeMillis()
-			processGameInput()
+			processGameInput(now)
 			runLogic(now)
 			render()
 		} catch (e: Exception) {
@@ -314,7 +322,7 @@ class Gameplay {
 	 * For each keypress, calls the appropriate game logic function exactly once.
 	 */
 	@WorkerThread
-	private fun processGameInput() {
+	private fun processGameInput(now: Long) {
 		val keys = pressedKeys.toSet() // make a copy for thread safety
 
 		val turnClockwise = (KeyEvent.KEYCODE_BUTTON_B in keys || KeyEvent.KEYCODE_DPAD_UP in keys)
@@ -333,19 +341,31 @@ class Gameplay {
 			turnCounterClockwisePressed = false
 		}
 
-		val fallFaster = KeyEvent.KEYCODE_DPAD_DOWN in keys
-		if (fallFaster && !fallFasterPressed) {
-			fallFasterPressed = true
+		val down = KeyEvent.KEYCODE_DPAD_DOWN in keys
+		if (down && !downPressed) {
+			downPressed = true
 			piece.moveDown(bottomHeap.getBlocks())
-		} else if (!fallFaster) {
-			fallFasterPressed = false
+			nextDownRepeat = now + Settings.Engine.MOVE_KEY_REPEAT_WAIT_TIME
+		} else if (down) {
+			if (now >= nextDownRepeat) {
+				nextDownRepeat = now + Settings.Engine.MOVE_KEY_REPEAT_INTERVAL
+				piece.moveDown(bottomHeap.getBlocks())
+			}
+		} else {
+			downPressed = false
 		}
 
 		val left = KeyEvent.KEYCODE_DPAD_LEFT in keys
 		if (left && !leftPressed) {
 			leftPressed = true
 			piece.moveLeft(bottomHeap.getBlocks())
-		} else if (!left) {
+			nextLeftRepeat = now + Settings.Engine.MOVE_KEY_REPEAT_WAIT_TIME
+		} else if (left) {
+			if (now >= nextLeftRepeat) {
+				nextLeftRepeat = now + Settings.Engine.MOVE_KEY_REPEAT_INTERVAL
+				piece.moveLeft(bottomHeap.getBlocks())
+			}
+		} else {
 			leftPressed = false
 		}
 
@@ -353,7 +373,13 @@ class Gameplay {
 		if (right && !rightPressed) {
 			rightPressed = true
 			piece.moveRight(bottomHeap.getBlocks())
-		} else if (!right) {
+			nextRightRepeat = now + Settings.Engine.MOVE_KEY_REPEAT_WAIT_TIME
+		} else if (right) {
+			if (now >= nextRightRepeat) {
+				nextRightRepeat = now + Settings.Engine.MOVE_KEY_REPEAT_INTERVAL
+				piece.moveRight(bottomHeap.getBlocks())
+			}
+		} else {
 			rightPressed = false
 		}
 	}
