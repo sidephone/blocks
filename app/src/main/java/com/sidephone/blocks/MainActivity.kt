@@ -19,7 +19,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.sidephone.blocks.engine.Gamepad
 import com.sidephone.blocks.engine.Gameplay
-import com.sidephone.blocks.screens.MainMenuScreen
+import com.sidephone.blocks.screens.main.MainMenuScreen
 import com.sidephone.blocks.screens.ScreenType
 import com.sidephone.blocks.screens.SettingsScreen
 import com.sidephone.blocks.screens.game.GameScreen

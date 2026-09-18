@@ -5,31 +5,29 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 val LightColorScheme = lightColorScheme(
-	primary = Color(0xFF4C545C),
+	primary = Color(0xFF4D5965),
 	onPrimary = Color(0xFFFFFFFF),
-	secondary = Color(0xFF087C9F),
+	secondary = Color(0xFF007A99),
 	onSecondary = Color(0xFFFFFFFF),
-	tertiary = Color(0xFF1769AA),
+	tertiary = Color(0xFF6547A5),
 	onTertiary = Color(0xFFFFFFFF),
-	background = Color(0xFFF2F3F4),
-	onBackground = Color(0xFF1A1C1E),
+	background = Color(0xFFF1F2F4),
+	onBackground = Color(0xFF181A1E),
 	surface = Color(0xFFFFFFFF),
-	onSurface = Color(0xFF1A1C1E),
-	onSurfaceVariant = Color(0xFF60656A),
+	onSurface = Color(0xFF181A1E),
+	onSurfaceVariant = Color(0xFF5F666E),
 )
 
 val DarkColorScheme = darkColorScheme(
-	primary = Color(0xFFB8C0C8),
-	onPrimary = Color(0xFF101214),
-	secondary = Color(0xFF80D8FF),
-	onSecondary = Color(0xFF00202A),
-	tertiary = Color(0xFF3B9DFF),
-	onTertiary = Color(0xFF001A2E),
-	background = Color(0xFF000000),
-	onBackground = Color(0xFFE0E4E8),
-	surface = Color(0xFF181A1C),
-	onSurface = Color(0xFFE0E4E8),
-	onSurfaceVariant = Color(0xFF9A9FA4),
+	primary = Color(0xFFC4CCD4),
+	onPrimary = Color(0xFF111318),
+	secondary = Color(0xFF5DD5F2),
+	onSecondary = Color(0xFF00232B),
+	tertiary = Color(0xFFB69CFF),
+	onTertiary = Color(0xFF21163D),
+	background = Color(0xFF080A0F),
+	onBackground = Color(0xFFE8EBEF),
+	surface = Color(0xFF151820),
+	onSurface = Color(0xFFE8EBEF),
+	onSurfaceVariant = Color(0xFFA5ABB4),
 )
-
-val DisabledAlpha = 0.38f

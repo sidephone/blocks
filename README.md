@@ -1,17 +1,17 @@
 # Blocks
 A Tetris-inspired game for Sidephone SP-01.
 
-## Tetris Score System
+Feel free to use this as a more advanced example of how to create games for Sidephone. The project structure is explained in the [tutorial project](https://github.com/sidephone/demo-game).
 
-1 line: 2 * (1 + level)
-2 lines: 5 * (1 + level)
-3 lines: 15 * (1 + level)
-4 lines: 60 * (1 + level)
+## Development Setup
+Just clone the project and import it in Android Studio. It has no extra dependencies, so you can build and run it directly in the emulator or on a real device.
 
-10 lines = next level
+Tested with Android Studio Quail 3 | 2026.1.3
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
 
 # TODO
 - shortcut key for hard drop
 - left, right, down are allowed to repeat when holding the button
 - ghost piece
-- logo, icon, colors
