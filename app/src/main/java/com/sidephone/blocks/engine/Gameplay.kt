@@ -297,8 +297,7 @@ class Gameplay {
 		if (
 			KeyEvent.KEYCODE_BUTTON_START in pressedKeys ||
 			KeyEvent.KEYCODE_DPAD_CENTER in pressedKeys ||
-			KeyEvent.KEYCODE_ENTER in pressedKeys ||
-			KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE in pressedKeys
+			KeyEvent.KEYCODE_ENTER in pressedKeys
 		) {
 			onStartButton()
 		}
