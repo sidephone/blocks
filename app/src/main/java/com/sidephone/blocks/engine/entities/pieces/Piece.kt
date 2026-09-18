@@ -88,7 +88,7 @@ abstract class Piece {
 		return DrawCommandGroup(
 			position.first,
 			position.second,
-			orientation.toFloat(),
+0f,
 			drawCommands
 		)
 	}
