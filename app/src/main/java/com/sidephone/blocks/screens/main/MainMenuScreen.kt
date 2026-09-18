@@ -24,7 +24,6 @@ fun MainMenuScreen(
 	isGamePaused: Boolean = false,
 	onNewGame: () -> Unit,
 	onEndGame: () -> Unit,
-	onSettings: () -> Unit,
 	onExit: () -> Unit
 ) {
 	val firstButtonFocusRequester = remember { FocusRequester() }
@@ -63,11 +62,6 @@ fun MainMenuScreen(
 			)
 		}
 
-		MenuButton(
-			onClick = onSettings,
-			modifier = Modifier.gamepadClickableButton(onSettings),
-			text = R.string.main_settings
-		)
 		MenuButton(
 			onClick = onExit,
 			modifier = Modifier.gamepadClickableButton(onExit),
