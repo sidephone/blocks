@@ -21,7 +21,6 @@ import com.sidephone.blocks.engine.Gamepad
 import com.sidephone.blocks.engine.Gameplay
 import com.sidephone.blocks.screens.main.MainMenuScreen
 import com.sidephone.blocks.screens.ScreenType
-import com.sidephone.blocks.screens.SettingsScreen
 import com.sidephone.blocks.screens.game.GameScreen
 import com.sidephone.blocks.settings.Settings
 import com.sidephone.blocks.ui.theme.GameTheme
@@ -62,7 +61,6 @@ class MainActivity : ComponentActivity() {
 					when (currentScreen) {
 						ScreenType.Menu -> MainMenuScreen(
 							isGamePaused = isGamePaused,
-							onSettings = { currentScreen = ScreenType.Settings },
 							onExit = { finish() },
 							onEndGame = {
 								gameplay.stop()
@@ -93,7 +91,6 @@ class MainActivity : ComponentActivity() {
 						// See: https://slack-chats.kotlinlang.org/t/12312231/funky-issue-i-ve-got-i-m-using-androidview-with-a-surfacevie
 						// See: https://issuetracker.google.com/issues/285718058
 						}
-						ScreenType.Settings -> SettingsScreen { currentScreen = ScreenType.Menu }
 					}
 				}
 			}
