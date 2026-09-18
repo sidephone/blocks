@@ -367,6 +367,11 @@ class Gameplay {
 		screenObjects.add(playground.draw())
 		screenObjects.add(bottomHeap.draw(playground.position()))
 		screenObjects.add(piece.draw())
+		screenObjects.add(PreviewWindow.drawNextPiece(
+			pieceBag.peek(),
+			playground.previewPosition(),
+			playground.cellSize()
+		))
 
 		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
 	}

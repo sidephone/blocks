@@ -11,13 +11,13 @@ import com.sidephone.blocks.engine.entities.pieces.PieceZ
 
 class PieceBag {
 	private val pieceTypes: List<Piece> = listOf(
-        PieceI(),
-        PieceJ(),
-        PieceL(),
-        PieceO(),
-        PieceS(),
-        PieceT(),
-        PieceZ(),
+		PieceI(),
+		PieceJ(),
+		PieceL(),
+		PieceO(),
+		PieceS(),
+		PieceT(),
+		PieceZ(),
 	)
 
 	private val pieces: MutableList<Piece> = mutableListOf()
@@ -30,6 +30,15 @@ class PieceBag {
 		do {
 			pieces.shuffle()
 		} while (last is Piece && pieces.first()::class == last!!::class)
+	}
+
+
+	fun peek(): Piece {
+		if (pieces.isEmpty()) {
+			shuffle()
+		}
+
+		return pieces.first()
 	}
 
 
