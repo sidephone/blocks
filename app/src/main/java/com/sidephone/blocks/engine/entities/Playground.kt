@@ -63,6 +63,7 @@ class Playground {
 	fun draw() = DrawCommandGroup(0f, 0f, 0f, drawCommands)
 	fun dimensions() = Pair(Playground.COLUMNS, Playground.ROWS)
 	fun position() = Pair(playgroundLeft, playgroundTop)
+	fun previewPosition() = Pair(previewLeft + previewWidth / 2, playgroundTop + wallWidth + previewHeight / 2)
 	fun scoreboardPosition() = Pair(scoreboardLeft, scoreboardTop)
 	fun scoreboardWidth() = previewWidth
 

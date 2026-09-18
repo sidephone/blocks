@@ -76,6 +76,24 @@ abstract class Piece {
 	}
 
 
+	fun draw(): DrawCommandGroup{
+		val (x, y) = calculateDrawPosition(drawOrigin, x, y, blockSize)
+		return DrawCommandGroup(x, y, orientation.toFloat(), drawCommands)
+	}
+
+
+	fun drawPreview(position: Pair<Float, Float>, blockSize: Float): DrawCommandGroup {
+		drawCommands = drawCommands.ifEmpty { blocks(blockSize).map { it.draw() } }
+
+		return DrawCommandGroup(
+			position.first,
+			position.second,
+			orientation.toFloat(),
+			drawCommands
+		)
+	}
+
+
 	fun fall(now: Long, level: Int, heapBlocks: List<Block>) {
 		if (isAtTheBottom) return
 
@@ -171,12 +189,6 @@ abstract class Piece {
 		if (!wallKick(heapBlocks)) orientation = previous
 
 		Log.d(LOG_TAG, "position: ($x, $y) orientation: $orientation")
-	}
-
-
-	fun draw(): DrawCommandGroup {
-		val (drawX, drawY) = calculateDrawPosition(drawOrigin, x, y, blockSize)
-		return DrawCommandGroup(drawX,drawY,orientation.toFloat(), drawCommands)
 	}
 
 
