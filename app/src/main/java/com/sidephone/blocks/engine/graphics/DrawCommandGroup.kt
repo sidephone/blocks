@@ -7,5 +7,6 @@ data class DrawCommandGroup(
 	val x: Float, // transformation origin x
 	val y: Float, // transformation origin y
 	val rotationDegrees: Float,
-	val commands: List<DrawCommand> // the list of the commands to be drawn and transformed together
+	val commands: List<DrawCommand>, // the list of the commands to be drawn and transformed together
+	val opacity: Float = 1f
 )

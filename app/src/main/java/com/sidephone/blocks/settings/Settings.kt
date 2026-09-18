@@ -6,6 +6,7 @@ import kotlin.math.min
 class Settings(context: android.content.Context) {
 	companion object {
 		private const val PREFS_NAME = "SpaceBlasterSettings"
+		private const val GHOST_PIECE_KEY = "ghost_piece"
 		private const val HIGH_SCORE_KEY = "hs"
 	}
 
@@ -26,6 +27,15 @@ class Settings(context: android.content.Context) {
 	}
 
 	private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
+
+
+	fun ghostPiece(): Boolean {
+		return sharedPreferences.getBoolean(GHOST_PIECE_KEY, true)
+	}
+
+	fun setGhostPiece(enabled: Boolean) {
+		sharedPreferences.edit { putBoolean(GHOST_PIECE_KEY, enabled) }
+	}
 
 
 	fun getHighScore(): Int {

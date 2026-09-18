@@ -147,13 +147,13 @@ class GameSurfaceView(context: Context, private var gameplay: Gameplay, private 
 
 				for (command in commandGroup.commands) {
 					when (command) {
-						is DrawCommand.Arc -> drawArc(this, command)
-						is DrawCommand.Circle -> drawCircle(this, command)
-						is DrawCommand.Dot -> drawDot(this, command)
-						is DrawCommand.Line -> drawLine(this, command)
-						is DrawCommand.Polygon -> drawPolygon(this, command)
-						is DrawCommand.Rect -> drawRectangle(this, command)
-						is DrawCommand.Text -> drawText(this, command)
+						is DrawCommand.Arc -> drawArc(this, command, commandGroup.opacity)
+						is DrawCommand.Circle -> drawCircle(this, command, commandGroup.opacity)
+						is DrawCommand.Dot -> drawDot(this, command, commandGroup.opacity)
+						is DrawCommand.Line -> drawLine(this, command, commandGroup.opacity)
+						is DrawCommand.Polygon -> drawPolygon(this, command, commandGroup.opacity)
+						is DrawCommand.Rect -> drawRectangle(this, command, commandGroup.opacity)
+						is DrawCommand.Text -> drawText(this, command, commandGroup.opacity)
 					}
 				}
 			}
@@ -161,8 +161,9 @@ class GameSurfaceView(context: Context, private var gameplay: Gameplay, private 
 	}
 
 
-	private fun drawArc(canvas: Canvas, command: DrawCommand.Arc) {
+	private fun drawArc(canvas: Canvas, command: DrawCommand.Arc, opacity: Float) {
 		paint.color = command.color
+		paint.alpha = (opacity * 255).toInt()
 		paint.style = if (command.filled) Paint.Style.FILL else Paint.Style.STROKE
 		val rectF = android.graphics.RectF(
 			command.cx - command.radius,
@@ -174,29 +175,33 @@ class GameSurfaceView(context: Context, private var gameplay: Gameplay, private 
 	}
 
 
-	private fun drawCircle(canvas: Canvas, command: DrawCommand.Circle) {
+	private fun drawCircle(canvas: Canvas, command: DrawCommand.Circle, opacity: Float) {
 		paint.color = command.color
+		paint.alpha = (opacity * 255).toInt()
 		paint.style = if (command.filled) Paint.Style.FILL else Paint.Style.STROKE
 		canvas.drawCircle(command.cx, command.cy, command.radius, paint)
 	}
 
 
-	private fun drawDot(canvas: Canvas, command: DrawCommand.Dot) {
+	private fun drawDot(canvas: Canvas, command: DrawCommand.Dot, opacity: Float) {
 		paint.color = command.color
+		paint.alpha = (opacity * 255).toInt()
 		canvas.drawPoint(command.x, command.y, paint)
 	}
 
 
-	private fun drawLine(canvas: Canvas, command: DrawCommand.Line) {
+	private fun drawLine(canvas: Canvas, command: DrawCommand.Line, opacity: Float) {
 		paint.color = command.color
+		paint.alpha = (opacity * 255).toInt()
 		canvas.drawLine(command.x1, command.y1, command.x2, command.y2, paint)
 	}
 
 
-	private fun drawPolygon(canvas: Canvas, command: DrawCommand.Polygon) {
+	private fun drawPolygon(canvas: Canvas, command: DrawCommand.Polygon, opacity: Float) {
 		if (command.points.isEmpty()) return
 
 		paint.color = command.color
+		paint.alpha = (opacity * 255).toInt()
 		paint.style = if (command.filled) Paint.Style.FILL else Paint.Style.STROKE
 
 		val path = android.graphics.Path()
@@ -220,8 +225,9 @@ class GameSurfaceView(context: Context, private var gameplay: Gameplay, private 
 	}
 
 
-	private fun drawRectangle(canvas: Canvas, command: DrawCommand.Rect) {
+	private fun drawRectangle(canvas: Canvas, command: DrawCommand.Rect, opacity: Float) {
 		paint.color = command.color
+		paint.alpha = (opacity * 255).toInt()
 		paint.style = if (command.filled) Paint.Style.FILL else Paint.Style.STROKE
 
 		if (command.rotateDeg == 0f) {
@@ -240,8 +246,9 @@ class GameSurfaceView(context: Context, private var gameplay: Gameplay, private 
 	}
 
 
-	private fun drawText(canvas: Canvas, command: DrawCommand.Text) {
+	private fun drawText(canvas: Canvas, command: DrawCommand.Text, opacity: Float) {
 		paint.color = command.color
+		paint.alpha = (opacity * 255).toInt()
 		paint.style = Paint.Style.FILL
 		paint.isAntiAlias = true
 		paint.textSize = command.textSize

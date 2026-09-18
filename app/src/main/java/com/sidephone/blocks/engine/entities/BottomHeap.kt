@@ -88,6 +88,24 @@ class BottomHeap {
 	}
 
 
+	/**
+	 * Returns a list of the peaks per each column in the heap. The peak is defined as the highest Y
+	 * value (lowest on the screen) for each column. If the column has no blocks, the peak is `maxLines`. The
+	 * return list always contains `maxBlocksPerLine` elements, where the index corresponds to the column index.
+	 */
+	fun peaks(): List<Int> {
+		val peaks = MutableList(maxBlocksPerLine) { maxLines }
+		for (line in lines.values) {
+			for (block in line) {
+				if (block.gridY < peaks[block.gridX]) {
+					peaks[block.gridX] = block.gridY
+				}
+			}
+		}
+		return peaks
+	}
+
+
 	fun reset(playgroundDimensions: Pair<Int, Int>, playgroundCellSize: Float) {
 		cellSize = playgroundCellSize
 		drawCommands.clear()

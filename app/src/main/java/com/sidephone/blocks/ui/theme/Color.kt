@@ -31,3 +31,5 @@ val DarkColorScheme = darkColorScheme(
 	onSurface = Color(0xFFE8EBEF),
 	onSurfaceVariant = Color(0xFFA5ABB4),
 )
+
+const val DisabledAlpha = 0.38f

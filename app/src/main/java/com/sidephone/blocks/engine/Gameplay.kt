@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
  * The main game engine class. It contains the game loop, input handling, and game state management.
  * It is designed to be simple and easy to understand, so you can modify it to create your own game.
  */
-class Gameplay {
+class Gameplay(private val settings: Settings) {
 	companion object {
 		private val LOG_TAG = Gameplay::class.java.simpleName
 	}
@@ -73,6 +73,7 @@ class Gameplay {
 
 	// game objects
 	private var bottomHeap = BottomHeap()
+	private var ghost = GhostPiece()
 	private var piece: Piece = PieceI()
 	private var pieceBag = PieceBag()
 	private var playground = Playground()
@@ -110,6 +111,7 @@ class Gameplay {
 		nextLeftRepeat = 0L
 		nextRightRepeat = 0L
 
+		ghost.clear()
 		playground.create(viewportWidth)
 		bottomHeap.reset(playground.dimensions(), playground.cellSize())
 		piece = pieceBag.pop()
@@ -428,8 +430,12 @@ class Gameplay {
 
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
+		if (settings.ghostPiece()) {
+			ghost.draw(piece, bottomHeap.peaks()).let { obj -> if (obj != null) screenObjects.add(obj) }
+		}
 		screenObjects.add(bottomHeap.draw(playground.position()))
 		screenObjects.add(piece.draw())
+
 		screenObjects.add(PreviewWindow.drawNextPiece(
 			pieceBag.peek(),
 			playground.previewPosition(),
@@ -460,6 +466,7 @@ class Gameplay {
 			return
 		}
 
+		ghost.clear()
 		piece = pieceBag.pop()
 		piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
 	}
