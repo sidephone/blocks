@@ -73,6 +73,7 @@ class Gameplay {
 
 	// game objects
 	private var bottomHeap = BottomHeap()
+	private var ghost = GhostPiece()
 	private var piece: Piece = PieceI()
 	private var pieceBag = PieceBag()
 	private var playground = Playground()
@@ -110,6 +111,7 @@ class Gameplay {
 		nextLeftRepeat = 0L
 		nextRightRepeat = 0L
 
+		ghost.clear()
 		playground.create(viewportWidth)
 		bottomHeap.reset(playground.dimensions(), playground.cellSize())
 		piece = pieceBag.pop()
@@ -429,6 +431,7 @@ class Gameplay {
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
 		screenObjects.add(bottomHeap.draw(playground.position()))
+		ghost.draw(piece, bottomHeap.peaks()).let { obj -> if (obj != null) screenObjects.add(obj) }
 		screenObjects.add(piece.draw())
 		screenObjects.add(PreviewWindow.drawNextPiece(
 			pieceBag.peek(),
@@ -460,6 +463,7 @@ class Gameplay {
 			return
 		}
 
+		ghost.clear()
 		piece = pieceBag.pop()
 		piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
 	}

@@ -10,6 +10,7 @@ import kotlin.math.roundToLong
 abstract class Piece {
 	companion object {
 		private val LOG_TAG = Piece::class.simpleName
+		const val GHOST_OPACITY = 0.4f
 		const val MIN_FALL_INTERVAL = 16L // ms per line
 	}
 
@@ -49,10 +50,13 @@ abstract class Piece {
 	protected abstract fun right(orientation: Int): Int
 
 
+	fun blockGridPositions() = blocks().map { block -> Pair(block.gridX + x, block.gridY + y) }
 	fun gridX() = x
 	fun gridY() = y
 	fun isAtTheBottom() = isAtTheBottom
+	fun orientation() = orientation
 	protected open fun spawnPosition(gridDimensions: Pair<Int, Int>) = Pair(gridDimensions.first / 2 - 1, 1)
+
 
 
 	/**
@@ -81,6 +85,12 @@ abstract class Piece {
 	fun draw(): DrawCommandGroup{
 		val (x, y) = calculateDrawPosition(drawOrigin, x, y, blockSize)
 		return DrawCommandGroup(x, y, orientation.toFloat(), drawCommands)
+	}
+
+
+	fun drawGhost(gridY: Int): DrawCommandGroup {
+		val (x, y) = calculateDrawPosition(drawOrigin, x, gridY, blockSize)
+		return DrawCommandGroup(x, y, orientation.toFloat(), drawCommands, GHOST_OPACITY)
 	}
 
 
