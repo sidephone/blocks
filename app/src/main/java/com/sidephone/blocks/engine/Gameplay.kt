@@ -430,6 +430,9 @@ class Gameplay(private val settings: Settings) {
 
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
+		if (settings.ghostPiece()) {
+			ghost.draw(piece, bottomHeap.peaks()).let { obj -> if (obj != null) screenObjects.add(obj) }
+		}
 		screenObjects.add(bottomHeap.draw(playground.position()))
 		screenObjects.add(piece.draw())
 
@@ -438,10 +441,6 @@ class Gameplay(private val settings: Settings) {
 			playground.previewPosition(),
 			playground.cellSize()
 		))
-
-		if (settings.ghostPiece()) {
-			ghost.draw(piece, bottomHeap.peaks()).let { obj -> if (obj != null) screenObjects.add(obj) }
-		}
 
 		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
 	}
