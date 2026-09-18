@@ -225,7 +225,12 @@ class Gameplay {
 	 */
 	@MainThread
 	fun onStartButton() {
-		pause()
+		if (gameOver.value) {
+			stop()
+		} else {
+			pause()
+		}
+
 		onStartButtonPressed()
 	}
 
@@ -310,9 +315,6 @@ class Gameplay {
 	}
 
 
-	/**
-	 * For each keypress, calls the appropriate game logic function exactly once.
-	 */
 	@WorkerThread
 	private fun processGameInput() {
 		val keys = pressedKeys.toSet() // make a copy for thread safety
