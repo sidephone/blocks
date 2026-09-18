@@ -176,19 +176,19 @@ abstract class Piece {
 
 
 	fun moveLeft(heapBlocks: List<Block>) {
-		if (!isAtTheBottom && x + left(orientation) > 0 && !isBlocked(heapBlocks, NextMove.LEFT.offset))
+		if (!isDroppingHard && !isAtTheBottom && x + left(orientation) > 0 && !isBlocked(heapBlocks, NextMove.LEFT.offset))
 			x -= 1
 	}
 
 
 	fun moveRight(heapBlocks: List<Block>) {
-		if (!isAtTheBottom && x + right(orientation) < maxX && !isBlocked(heapBlocks, NextMove.RIGHT.offset))
+		if (!isDroppingHard && !isAtTheBottom && x + right(orientation) < maxX && !isBlocked(heapBlocks, NextMove.RIGHT.offset))
 			x += 1
 	}
 
 
 	open fun rotateClockwise(heapBlocks: List<Block>) {
-		if (isAtTheBottom) return
+		if (isDroppingHard || isAtTheBottom) return
 
 		val previous = orientation
 		orientation += 90
@@ -200,7 +200,7 @@ abstract class Piece {
 
 
 	open fun rotateCounterClockwise(heapBlocks: List<Block>) {
-		if (isAtTheBottom) return
+		if (isDroppingHard || isAtTheBottom) return
 
 		val previous = orientation
 		orientation -= 90
