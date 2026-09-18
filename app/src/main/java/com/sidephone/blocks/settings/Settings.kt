@@ -1,6 +1,7 @@
 package com.sidephone.blocks.settings
 
 import androidx.core.content.edit
+import kotlin.math.min
 
 class Settings(context: android.content.Context) {
 	companion object {
@@ -12,6 +13,8 @@ class Settings(context: android.content.Context) {
 		// faster loop to handle fastest piece drop speed properly
 		const val TARGET_FPS = 120
 		const val TARGET_IPS = 120
+		val MOVE_KEY_REPEAT_WAIT_TIME = 250L // ms
+		val MOVE_KEY_REPEAT_INTERVAL = 1000L / min(10, TARGET_IPS) // 10 times per second but not faster than the engine can handle
 	}
 
 	object Gameplay {

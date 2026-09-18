@@ -41,6 +41,27 @@ class Gamepad {
 
 	private fun hasKey(keyCode: Int): Boolean {
 		return when (keyCode) {
+			// QWERTY
+			KeyEvent.KEYCODE_Q,
+			KeyEvent.KEYCODE_T,
+			KeyEvent.KEYCODE_O,
+			KeyEvent.KEYCODE_D,
+			KeyEvent.KEYCODE_J,
+			KeyEvent.KEYCODE_B,
+			KeyEvent.KEYCODE_SPACE,
+			KeyEvent.KEYCODE_ENTER,
+
+			// T9
+			KeyEvent.KEYCODE_1,
+			KeyEvent.KEYCODE_2,
+			KeyEvent.KEYCODE_3,
+			KeyEvent.KEYCODE_4,
+			KeyEvent.KEYCODE_6,
+			KeyEvent.KEYCODE_8,
+			KeyEvent.KEYCODE_0,
+			KeyEvent.KEYCODE_DPAD_CENTER,
+
+			// Gamepad
 			KeyEvent.KEYCODE_BUTTON_A,
 			KeyEvent.KEYCODE_BUTTON_B,
 			KeyEvent.KEYCODE_BUTTON_X,
