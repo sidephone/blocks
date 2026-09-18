@@ -6,9 +6,9 @@ import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.sidephone.blocks.engine.entities.BottomHeap
+import com.sidephone.blocks.engine.entities.PieceBag
 import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.entities.pieces.Piece
-import com.sidephone.blocks.engine.entities.PieceBag
 import com.sidephone.blocks.engine.entities.pieces.PieceI
 import com.sidephone.blocks.engine.graphics.DrawCommandGroup
 import com.sidephone.blocks.engine.graphics.GameFrame
@@ -46,6 +46,9 @@ class Gameplay {
 	// output
 	private var onStartButtonPressed = {}
 	private var onStarted = {}
+
+	private val _gameOver = MutableStateFlow(false)
+	val gameOver: StateFlow<Boolean> = _gameOver
 
 	private val _lines = MutableStateFlow(0)
 	val lines: StateFlow<Int> = _lines
@@ -86,6 +89,7 @@ class Gameplay {
 	fun reset() {
 		pressedKeys = setOf()
 
+		_gameOver.value = false
 		_lines.value = 0
 		_level.value = 0
 		_score.value = 0
@@ -337,6 +341,8 @@ class Gameplay {
 
 	@WorkerThread
 	private fun render() {
+		if (gameOver.value) return
+
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
 		screenObjects.add(bottomHeap.draw(playground.position()))
@@ -348,6 +354,8 @@ class Gameplay {
 
 	@WorkerThread
 	private fun runLogic(now: Long) {
+		if (gameOver.value) return
+
 		piece.fall(now, level.value, bottomHeap.getBlocks())
 		if (!piece.isAtTheBottom()) return
 
@@ -358,6 +366,11 @@ class Gameplay {
 				_lines.value += linesCleared.size
 				_level.value = _lines.value / Settings.Gameplay.LINES_PER_LEVEL
 			}
+		}
+
+		if (bottomHeap.isFull()) {
+			_gameOver.value = true
+			return
 		}
 
 		piece = pieceBag.pop()

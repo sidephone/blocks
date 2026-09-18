@@ -12,7 +12,6 @@ A Tetris-inspired game for Sidephone SP-01.
 
 # TODO
 - shortcut key for hard drop
-- game over when the heap is full
 - score & high score
 - left, right, down are allowed to repeat when holding the button
 - preview

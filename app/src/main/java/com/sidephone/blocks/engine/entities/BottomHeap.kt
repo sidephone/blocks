@@ -16,10 +16,13 @@ class BottomHeap {
 	private var maxLines = 0
 
 
+	fun isFull() = lines.size >= maxLines
 	fun getBlocks() = lines.values.flatten()
 
 
 	fun add(piece: Piece) {
+		if (isFull()) return
+
 		piece.blocks().forEach { block -> run {
 			val newBlock = block.moveBy(piece.gridX(), piece.gridY())
 
