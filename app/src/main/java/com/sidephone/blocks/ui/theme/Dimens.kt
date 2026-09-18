@@ -3,7 +3,8 @@ package com.sidephone.blocks.ui.theme
 import androidx.compose.ui.unit.dp
 
 object Dimens {
-	val MainMenuTitlePaddingTop = 16.dp
+	val MainMenuTitlePaddingTop = 11.dp
+	val MainMenuTitlePaddingHorizontal = 12.dp
 	val MainMenuTitlePaddingBottom = 32.dp
 
 	val MainMenuButtonContainerPadding = 24.dp
