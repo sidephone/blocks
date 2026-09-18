@@ -2,24 +2,29 @@ package com.sidephone.blocks.engine.entities.pieces
 
 import com.sidephone.blocks.engine.graphics.DrawCommand
 
-object Block {
-	private const val GAP = 1.5f
-
-
-	fun draw(gridLeft: Int, gridTop: Int, size: Float, color: Int): DrawCommand {
-		return drawShifted(gridLeft, gridTop, size, color, 0f, 0f)
+class Block(var gridX: Int, var gridY: Int, val drawSize: Float, val color: Int, val shiftX: Float = 0f, val shiftY: Float = 0f) {
+	companion object {
+		private const val GAP = 1.5f
 	}
 
 
-	fun drawShifted(gridLeft: Int, gridTop: Int, size: Float, color: Int, shiftX: Float, shiftY: Float): DrawCommand {
+	fun draw() = drawAt(Pair(0f, 0f))
+
+
+	fun drawAt(position: Pair<Float, Float>): DrawCommand {
 		return DrawCommand.Rect(
-			(-0.5f + shiftX + gridLeft) * size + GAP,
-			(-0.5f + shiftY + gridTop) * size + GAP,
-			(0.5f + shiftX + gridLeft) * size - GAP,
-			(0.5f + shiftY + gridTop) * size - GAP,
+			position.first + (-0.5f + shiftX + gridX) * drawSize + GAP,
+			position.second + (-0.5f + shiftY + gridY) * drawSize + GAP,
+			position.first + (0.5f + shiftX + gridX) * drawSize - GAP,
+			position.second + (0.5f + shiftY + gridY) * drawSize - GAP,
 			0f,
 			color,
 			true
 		)
+	}
+
+
+	fun moveBy(dx: Int, dy: Int): Block {
+		return Block(gridX + dx, gridY + dy, drawSize, color, shiftX, shiftY)
 	}
 }

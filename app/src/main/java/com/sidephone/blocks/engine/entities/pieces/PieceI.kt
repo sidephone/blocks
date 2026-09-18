@@ -1,11 +1,10 @@
 package com.sidephone.blocks.engine.entities.pieces
 
-import com.sidephone.blocks.engine.graphics.DrawCommand
-
 class PieceI : Piece() {
 	companion object {
 		private const val COLOR = 0xFF00FFFF.toInt() // cyan
 	}
+
 
 	override fun bottom(orientation: Int): Int {
 		return when (orientation) {
@@ -16,6 +15,7 @@ class PieceI : Piece() {
 		}
 	}
 
+
 	override fun left(orientation: Int): Int {
 		return when (orientation) {
 			0, 180 -> -2
@@ -24,6 +24,7 @@ class PieceI : Piece() {
 			else -> 0
 		}
 	}
+
 
 	override fun right(orientation: Int): Int {
 		return when (orientation) {
@@ -34,6 +35,29 @@ class PieceI : Piece() {
 		}
 	}
 
+
+	override fun blocks(): List<Block> {
+		return blocks.map { block ->
+			 when (orientation) {
+				90 -> Block(-block.gridY - 1, block.gridX, block.drawSize, block.color, block.shiftX, block.shiftY)
+				180 -> Block(-block.gridX - 1, -block.gridY - 1, block.drawSize, block.color, block.shiftX, block.shiftY)
+				270 -> Block(block.gridY, -block.gridX - 1, block.drawSize, block.color, block.shiftX, block.shiftY)
+				else -> block
+			}
+		}
+	}
+
+
+	override fun blocks(drawSize: Float): List<Block> {
+		return listOf(
+			Block(-2, -1, drawSize, COLOR, 0.5f, 0.5f),
+			Block(-1, -1, drawSize, COLOR, 0.5f, 0.5f),
+			Block(0, -1, drawSize, COLOR, 0.5f, 0.5f),
+			Block(1, -1, drawSize, COLOR, 0.5f, 0.5f),
+		)
+	}
+
+
 	override fun calculateDrawPosition(drawOrigin: Pair<Float, Float>, gridX: Int, gridY: Int, blockSize: Float): Pair<Float, Float> {
 		return Pair(
 			drawOrigin.first + gridX * blockSize,
@@ -41,14 +65,6 @@ class PieceI : Piece() {
 		)
 	}
 
-	override fun drawBlocks(blockSize: Float): List<DrawCommand> {
-		return listOf(
-			Block.drawShifted(-2, -1, blockSize, COLOR, 0.5f, 0.5f),
-			Block.drawShifted(-1, -1, blockSize, COLOR, 0.5f, 0.5f),
-			Block.drawShifted(0, -1, blockSize, COLOR, 0.5f, 0.5f),
-			Block.drawShifted(1, -1, blockSize, COLOR, 0.5f, 0.5f),
-		)
-	}
 
 	override fun spawnPosition(gridDimensions: Pair<Int, Int>): Pair<Int, Int> {
 		return Pair(gridDimensions.first / 2, 1)

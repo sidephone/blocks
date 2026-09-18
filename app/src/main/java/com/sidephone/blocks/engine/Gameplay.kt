@@ -5,9 +5,10 @@ import android.view.KeyEvent
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
+import com.sidephone.blocks.engine.entities.BottomHeap
+import com.sidephone.blocks.engine.entities.PieceBag
 import com.sidephone.blocks.engine.entities.Playground
 import com.sidephone.blocks.engine.entities.pieces.Piece
-import com.sidephone.blocks.engine.entities.pieces.PieceBag
 import com.sidephone.blocks.engine.entities.pieces.PieceI
 import com.sidephone.blocks.engine.graphics.DrawCommandGroup
 import com.sidephone.blocks.engine.graphics.GameFrame
@@ -46,6 +47,9 @@ class Gameplay {
 	private var onStartButtonPressed = {}
 	private var onStarted = {}
 
+	private val _gameOver = MutableStateFlow(false)
+	val gameOver: StateFlow<Boolean> = _gameOver
+
 	private val _lines = MutableStateFlow(0)
 	val lines: StateFlow<Int> = _lines
 
@@ -63,6 +67,7 @@ class Gameplay {
 	@Volatile private var firstIteration = true
 
 	// game objects
+	private var bottomHeap = BottomHeap()
 	private var piece: Piece = PieceI()
 	private var pieceBag = PieceBag()
 	private var playground = Playground()
@@ -84,6 +89,7 @@ class Gameplay {
 	fun reset() {
 		pressedKeys = setOf()
 
+		_gameOver.value = false
 		_lines.value = 0
 		_level.value = 0
 		_score.value = 0
@@ -94,8 +100,8 @@ class Gameplay {
 		turnClockwisePressed = false
 		turnCounterClockwisePressed = false
 
-
 		playground.create(viewportWidth)
+		bottomHeap.reset(playground.dimensions(), playground.cellSize())
 		piece = pieceBag.pop()
 		piece.spawn(System.currentTimeMillis(), playground.position(), playground.dimensions(), playground.cellSize())
 
@@ -155,13 +161,13 @@ class Gameplay {
 		engineLooper = executor.scheduleWithFixedDelay(
 			{ advance() },
 			0,
-			1_000_000_000L / Settings.Gameplay.TARGET_IPS,
+			1_000_000_000L / Settings.Engine.TARGET_IPS,
 			TimeUnit.NANOSECONDS
 		)
 
 		onStarted()
 
-		Log.d(LOG_TAG, "Gameplay loop started at ${Settings.Gameplay.TARGET_IPS} iterations per second")
+		Log.d(LOG_TAG, "Gameplay loop started at ${Settings.Engine.TARGET_IPS} iterations per second")
 	}
 
 
@@ -285,6 +291,26 @@ class Gameplay {
 
 
 	/**
+	 * Score system based on the NES Tetris rules, but all points are reduced by an equal factor to
+	 * avoid huge numbers with useless trailing zeros.
+	 * See here for more information: https://tetris.wiki/Scoring
+	 */
+	@WorkerThread
+	private fun increaseScore(linesCleared: Int) {
+		_lines.value += linesCleared
+		_level.value = _lines.value / Settings.Gameplay.LINES_PER_LEVEL
+
+		val points = when (linesCleared) {
+			1 -> Settings.Gameplay.POINTS_PER_1_LINE
+			2 -> Settings.Gameplay.POINTS_PER_2_LINES
+			3 -> Settings.Gameplay.POINTS_PER_3_LINES
+			else -> Settings.Gameplay.POINTS_PER_4_LINES
+		}
+		_score.value += points * (level.value + 1)
+	}
+
+
+	/**
 	 * For each keypress, calls the appropriate game logic function exactly once.
 	 */
 	@WorkerThread
@@ -294,7 +320,7 @@ class Gameplay {
 		val turnClockwise = (KeyEvent.KEYCODE_BUTTON_B in keys || KeyEvent.KEYCODE_DPAD_UP in keys)
 		if (turnClockwise && !turnClockwisePressed) {
 			turnClockwisePressed = true
-			piece.rotateClockwise()
+			piece.rotateClockwise(bottomHeap.getBlocks())
 		} else if (!turnClockwise) {
 			turnClockwisePressed = false
 		}
@@ -302,7 +328,7 @@ class Gameplay {
 		val turnCounterClockwise = KeyEvent.KEYCODE_BUTTON_A in keys
 		if (turnCounterClockwise && !turnCounterClockwisePressed) {
 			turnCounterClockwisePressed = true
-			piece.rotateCounterClockwise()
+			piece.rotateCounterClockwise(bottomHeap.getBlocks())
 		} else if (!turnCounterClockwise) {
 			turnCounterClockwisePressed = false
 		}
@@ -310,7 +336,7 @@ class Gameplay {
 		val fallFaster = KeyEvent.KEYCODE_DPAD_DOWN in keys
 		if (fallFaster && !fallFasterPressed) {
 			fallFasterPressed = true
-			piece.moveDown()
+			piece.moveDown(bottomHeap.getBlocks())
 		} else if (!fallFaster) {
 			fallFasterPressed = false
 		}
@@ -318,7 +344,7 @@ class Gameplay {
 		val left = KeyEvent.KEYCODE_DPAD_LEFT in keys
 		if (left && !leftPressed) {
 			leftPressed = true
-			piece.moveLeft()
+			piece.moveLeft(bottomHeap.getBlocks())
 		} else if (!left) {
 			leftPressed = false
 		}
@@ -326,7 +352,7 @@ class Gameplay {
 		val right = KeyEvent.KEYCODE_DPAD_RIGHT in keys
 		if (right && !rightPressed) {
 			rightPressed = true
-			piece.moveRight()
+			piece.moveRight(bottomHeap.getBlocks())
 		} else if (!right) {
 			rightPressed = false
 		}
@@ -335,8 +361,11 @@ class Gameplay {
 
 	@WorkerThread
 	private fun render() {
+		if (gameOver.value) return
+
 		val screenObjects = mutableListOf<DrawCommandGroup>()
 		screenObjects.add(playground.draw())
+		screenObjects.add(bottomHeap.draw(playground.position()))
 		screenObjects.add(piece.draw())
 
 		currentFrame = GameFrame(Playground.BACKGROUND, screenObjects)
@@ -345,10 +374,25 @@ class Gameplay {
 
 	@WorkerThread
 	private fun runLogic(now: Long) {
-		piece.fall(now, level.value)
-		if (piece.isAtTheBottom()) {
-			piece = pieceBag.pop()
-			piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
+		if (gameOver.value) return
+
+		piece.fall(now, level.value, bottomHeap.getBlocks())
+		if (!piece.isAtTheBottom()) return
+
+		bottomHeap.add(piece)
+		bottomHeap.clearCompleteLines().let { linesCleared ->
+			if (linesCleared.isNotEmpty()) {
+				bottomHeap.moveDownLines(linesCleared)
+				increaseScore(linesCleared.size)
+			}
 		}
+
+		if (bottomHeap.isFull()) {
+			_gameOver.value = true
+			return
+		}
+
+		piece = pieceBag.pop()
+		piece.spawn(now, playground.position(), playground.dimensions(), playground.cellSize())
 	}
 }

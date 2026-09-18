@@ -9,3 +9,10 @@ A Tetris-inspired game for Sidephone SP-01.
 4 lines: 60 * (1 + level)
 
 10 lines = next level
+
+# TODO
+- shortcut key for hard drop
+- left, right, down are allowed to repeat when holding the button
+- preview
+- ghost piece
+- logo, icon, colors
