@@ -291,6 +291,26 @@ class Gameplay {
 
 
 	/**
+	 * Score system based on the NES Tetris rules, but all points are reduced by an equal factor to
+	 * avoid huge numbers with useless trailing zeros.
+	 * See here for more information: https://tetris.wiki/Scoring
+	 */
+	@WorkerThread
+	private fun increaseScore(linesCleared: Int) {
+		_lines.value += linesCleared
+		_level.value = _lines.value / Settings.Gameplay.LINES_PER_LEVEL
+
+		val points = when (linesCleared) {
+			1 -> Settings.Gameplay.POINTS_PER_1_LINE
+			2 -> Settings.Gameplay.POINTS_PER_2_LINES
+			3 -> Settings.Gameplay.POINTS_PER_3_LINES
+			else -> Settings.Gameplay.POINTS_PER_4_LINES
+		}
+		_score.value += points * (level.value + 1)
+	}
+
+
+	/**
 	 * For each keypress, calls the appropriate game logic function exactly once.
 	 */
 	@WorkerThread
@@ -363,8 +383,7 @@ class Gameplay {
 		bottomHeap.clearCompleteLines().let { linesCleared ->
 			if (linesCleared.isNotEmpty()) {
 				bottomHeap.moveDownLines(linesCleared)
-				_lines.value += linesCleared.size
-				_level.value = _lines.value / Settings.Gameplay.LINES_PER_LEVEL
+				increaseScore(linesCleared.size)
 			}
 		}
 

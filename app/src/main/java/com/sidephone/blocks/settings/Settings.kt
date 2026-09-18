@@ -16,6 +16,10 @@ class Settings(context: android.content.Context) {
 
 	object Gameplay {
 		const val LINES_PER_LEVEL = 10
+		const val POINTS_PER_1_LINE = 2
+		const val POINTS_PER_2_LINES = 5
+		const val POINTS_PER_3_LINES = 15
+		const val POINTS_PER_4_LINES = 60
 	}
 
 	private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
