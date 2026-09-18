@@ -1,6 +1,5 @@
 package com.sidephone.blocks.engine
 
-import android.view.KeyCharacterMap
 import android.view.KeyEvent
 
 
@@ -13,11 +12,6 @@ import android.view.KeyEvent
  */
 class Gamepad {
 	val pressedKeys = mutableSetOf<Int>()
-
-
-	fun isSundial(): Boolean {
-		return KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS) && KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_MEDIA_NEXT) && KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-	}
 
 
 	fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -66,14 +60,6 @@ class Gamepad {
 			KeyEvent.KEYCODE_8,
 			KeyEvent.KEYCODE_0,
 			KeyEvent.KEYCODE_DPAD_CENTER,
-
-			// Sundial
-			// KEYCODE_DPAD_LEFT must be remapped to KEYCODE_BUTTON_A
-			// KEYCODE_DPAD_RIGHT must be remapped to KEYCODE_BUTTON_B
-			KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, // enter
-			KeyEvent.KEYCODE_TAB, // bottom left
-			KeyEvent.KEYCODE_MEDIA_NEXT, // right
-			KeyEvent.KEYCODE_MEDIA_PREVIOUS, // left
 
 			// Gamepad
 			KeyEvent.KEYCODE_BUTTON_A,

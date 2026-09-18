@@ -36,7 +36,6 @@ class Gameplay {
 
 	// input
 	@Volatile private var pressedKeys = setOf<Int>()
-	@Volatile private var remapInputForSundial = false
 
 	var downPressed = false
 	var hardDropPressed = false
@@ -94,7 +93,6 @@ class Gameplay {
 	@MainThread
 	fun reset() {
 		pressedKeys = setOf()
-		remapInputForSundial = false
 
 		_gameOver.value = false
 		_lines.value = 0
@@ -136,9 +134,8 @@ class Gameplay {
 	 * @param keys The set of currently pressed keys represented by their KeyEvent key codes.
 	 */
 	@MainThread
-	fun onPressedKeys(keys: Set<Int>, isSundialConnected: Boolean) {
+	fun onPressedKeys(keys: Set<Int>) {
 		pressedKeys = keys.toSet() // make a copy for thread safety
-		remapInputForSundial = isSundialConnected
 		preprocessInput()
 	}
 
@@ -335,8 +332,7 @@ class Gameplay {
 	private fun processGameInput(now: Long) {
 		val keys = pressedKeys.toSet() // make a copy for thread safety
 
-		val turnClockwise = (remapInputForSundial && KeyEvent.KEYCODE_DPAD_LEFT in keys)
-			|| KeyEvent.KEYCODE_BUTTON_B in keys
+		val turnClockwise = KeyEvent.KEYCODE_BUTTON_B in keys
 			|| KeyEvent.KEYCODE_DPAD_UP in keys
 			|| KeyEvent.KEYCODE_Q in keys
 			|| KeyEvent.KEYCODE_T in keys
@@ -350,8 +346,7 @@ class Gameplay {
 			turnClockwisePressed = false
 		}
 
-		val turnCounterClockwise = (remapInputForSundial && KeyEvent.KEYCODE_DPAD_RIGHT in keys)
-			|| KeyEvent.KEYCODE_BUTTON_A in keys
+		val turnCounterClockwise = KeyEvent.KEYCODE_BUTTON_A in keys
 			|| KeyEvent.KEYCODE_O in keys
 			|| KeyEvent.KEYCODE_3 in keys
 
@@ -382,7 +377,6 @@ class Gameplay {
 		val hardDrop = KeyEvent.KEYCODE_BUTTON_Y in keys
 			|| KeyEvent.KEYCODE_0 in keys
 			|| KeyEvent.KEYCODE_SPACE in keys
-			|| KeyEvent.KEYCODE_TAB in keys // sundial bottom left button
 
 		if (hardDrop && !hardDropPressed) {
 			hardDropPressed = true
@@ -394,7 +388,6 @@ class Gameplay {
 		val left = KeyEvent.KEYCODE_DPAD_LEFT in keys
 			|| KeyEvent.KEYCODE_4 in keys
 			|| KeyEvent.KEYCODE_D in keys
-			|| KeyEvent.KEYCODE_MEDIA_PREVIOUS in keys
 
 		if (left && !leftPressed) {
 			leftPressed = true
@@ -412,7 +405,6 @@ class Gameplay {
 		val right = KeyEvent.KEYCODE_DPAD_RIGHT in keys
 			|| KeyEvent.KEYCODE_6 in keys
 			|| KeyEvent.KEYCODE_J in keys
-			|| KeyEvent.KEYCODE_MEDIA_NEXT in keys
 
 		if (right && !rightPressed) {
 			rightPressed = true

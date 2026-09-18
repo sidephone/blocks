@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
 
 	override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
 		if (gameplay.isRunning() && gamepad.onKeyDown(keyCode, event)) {
-			gameplay.onPressedKeys(gamepad.pressedKeys, gamepad.isSundial())
+			gameplay.onPressedKeys(gamepad.pressedKeys)
 			return true
 		}
 
@@ -119,7 +119,7 @@ class MainActivity : ComponentActivity() {
 
 	override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
 		if (gameplay.isRunning() && gamepad.onKeyUp(keyCode)) {
-			gameplay.onPressedKeys(gamepad.pressedKeys, gamepad.isSundial())
+			gameplay.onPressedKeys(gamepad.pressedKeys)
 			return true
 		}
 
